@@ -30,6 +30,11 @@ let users = [];
 
 // --- Functions ---
 
+const userTableBody = document.getElementById("user-table-body");
+const addUserForm = document.getElementById("add-user-form");
+const changePasswordForm = document.getElementById("password-form")
+const searchInput = document.getElementById("search-input");
+const tableHeaders = document.querySelectorAll("#user-table thead th");
 /**
  * TODO: Implement the createUserRow function.
  * This function takes a user object { id, name, email, is_admin } and returns a <tr> element.
@@ -41,6 +46,7 @@ let users = [];
  *    - An "Edit" button with class "edit-btn" and a data-id attribute set to the user's id.
  *    - A "Delete" button with class "delete-btn" and a data-id attribute set to the user's id.
  */
+
 function createUserRow(user) {
   // ... your implementation here ...
 }
