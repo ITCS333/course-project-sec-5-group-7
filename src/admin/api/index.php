@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+error_reporting(E_ALL);
+ob_start();
 /**
  * User Management API
  *
@@ -54,10 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Assume a function getDBConnection() is available that returns a PDO instance
 // configured for the 'course' database (see schema.sql).
 require_once __DIR__ . '/../../common/db.php';
-
-
-// TODO: Get the PDO database connection by calling getDBConnection().
-$db = getDBConnection();
 
 
 // TODO: Read the HTTP request method from $_SERVER['REQUEST_METHOD'].
@@ -415,6 +415,8 @@ function changePassword($db, $data) {
 
 try {
 
+    $db = getDBConnection();
+
     if ($method === 'GET') {
         // TODO: If the 'id' query parameter is present and non-empty, call getUserById($db, $id).
         // TODO: Otherwise, call getUsers($db) (supports optional search/sort parameters).
@@ -474,20 +476,15 @@ try {
  * @param int   $statusCode HTTP status code (default 200).
  */
 function sendResponse($data, $statusCode = 200) {
-    // TODO: Call http_response_code($statusCode).
+    ob_end_clean();
     http_response_code($statusCode);
 
-    // TODO: If $statusCode indicates success (< 400), echo:
-    //         json_encode(['success' => true, 'data' => $data])
-    //       Otherwise echo:
-    //         json_encode(['success' => false, 'message' => $data])
     if ($statusCode < 400) {
         echo json_encode(['success' => true, 'data' => $data]);
     } else {
         echo json_encode(['success' => false, 'message' => $data]);
     }
 
-    // TODO: Call exit to stop further execution.
     exit;
 }
 
