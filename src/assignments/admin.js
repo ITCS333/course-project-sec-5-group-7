@@ -33,8 +33,10 @@ let assignments = [];
 
 // --- Element Selections ---
 // TODO: Select the assignment form by id 'assignment-form'.
+const assignmentForm = document.getElementById('assignment-form');
 
 // TODO: Select the assignments table body by id 'assignments-tbody'.
+const assignmentsTbody = document.getElementById('assignments-tbody');
 
 // --- Functions ---
 
@@ -55,7 +57,37 @@ let assignments = [];
  *      The data-id holds the integer primary key from the assignments table.
  */
 function createAssignmentRow(assignment) {
-  // ... your implementation here ...
+  const tr = document.createElement('tr');
+
+  const titleTd = document.createElement('td');
+  titleTd.textContent = assignment.title;
+
+  const dueDateTd = document.createElement('td');
+  dueDateTd.textContent = assignment.due_date;
+
+  const descriptionTd = document.createElement('td');
+  descriptionTd.textContent = assignment.description;
+
+  const actionsTd = document.createElement('td');
+  const editBtn = document.createElement('button');
+  editBtn.className = 'edit-btn';
+  editBtn.dataset.id = assignment.id;
+  editBtn.textContent = 'Edit';
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'delete-btn';
+  deleteBtn.dataset.id = assignment.id;
+  deleteBtn.textContent = 'Delete';
+
+  actionsTd.appendChild(editBtn);
+  actionsTd.appendChild(deleteBtn);
+
+  tr.appendChild(titleTd);
+  tr.appendChild(dueDateTd);
+  tr.appendChild(descriptionTd);
+  tr.appendChild(actionsTd);
+
+  return tr;
 }
 
 /**
@@ -68,7 +100,10 @@ function createAssignmentRow(assignment) {
  *    append the <tr> to the table body.
  */
 function renderTable() {
-  // ... your implementation here ...
+  assignmentsTbody.innerHTML = '';
+  for (const assignment of assignments) {
+    assignmentsTbody.appendChild(createAssignmentRow(assignment));
+  }
 }
 
 /**
@@ -96,7 +131,39 @@ function renderTable() {
  *        - Reset the form.
  */
 async function handleAddAssignment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const title = document.getElementById('assignment-title').value;
+  const due_date = document.getElementById('assignment-due-date').value;
+  const description = document.getElementById('assignment-description').value;
+  const files = document.getElementById('assignment-files').value
+    .split('\n')
+    .filter(line => line.trim() !== '');
+
+  const submitBtn = document.getElementById('add-assignment');
+  const editId = submitBtn.dataset.editId;
+
+  try {
+    if (editId) {
+      await handleUpdateAssignment(Number(editId), { title, due_date, description, files });
+    } else {
+      const response = await fetch('./api/index.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, due_date, description, files }),
+      });
+      const result = await response.json();
+      if (result.success === true) {
+        assignments.push({ id: result.id, title, due_date, description, files });
+        renderTable();
+        assignmentForm.reset();
+      } else {
+        alert(result.message || 'Failed to add assignment.');
+      }
+    }
+  } catch {
+    alert('Could not connect to the server.');
+  }
 }
 
 /**
@@ -117,7 +184,29 @@ async function handleAddAssignment(event) {
  *      its data-edit-id attribute.
  */
 async function handleUpdateAssignment(id, fields) {
-  // ... your implementation here ...
+  try {
+    const response = await fetch('./api/index.php', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...fields }),
+    });
+    const result = await response.json();
+    if (result.success === true) {
+      const index = assignments.findIndex(a => a.id === id);
+      if (index !== -1) {
+        assignments[index] = { id, ...fields };
+      }
+      renderTable();
+      assignmentForm.reset();
+      const submitBtn = document.getElementById('add-assignment');
+      submitBtn.textContent = 'Add Assignment';
+      delete submitBtn.dataset.editId;
+    } else {
+      alert(result.message || 'Failed to update assignment.');
+    }
+  } catch {
+    alert('Could not connect to the server.');
+  }
 }
 
 /**
@@ -144,7 +233,34 @@ async function handleUpdateAssignment(id, fields) {
  *       assignment's id.
  */
 async function handleTableClick(event) {
-  // ... your implementation here ...
+  if (event.target.classList.contains('delete-btn')) {
+    const id = Number(event.target.dataset.id);
+    try {
+      const response = await fetch(`./api/index.php?id=${id}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (result.success === true) {
+        assignments = assignments.filter(a => a.id !== id);
+        renderTable();
+      } else {
+        alert(result.message || 'Failed to delete assignment.');
+      }
+    } catch {
+      alert('Could not connect to the server.');
+    }
+  } else if (event.target.classList.contains('edit-btn')) {
+    const id = Number(event.target.dataset.id);
+    const assignment = assignments.find(a => a.id === id);
+    if (!assignment) return;
+
+    document.getElementById('assignment-title').value = assignment.title;
+    document.getElementById('assignment-due-date').value = assignment.due_date;
+    document.getElementById('assignment-description').value = assignment.description;
+    document.getElementById('assignment-files').value = assignment.files.join('\n');
+
+    const submitBtn = document.getElementById('add-assignment');
+    submitBtn.textContent = 'Update Assignment';
+    submitBtn.dataset.editId = assignment.id;
+  }
 }
 
 /**
@@ -161,7 +277,20 @@ async function handleTableClick(event) {
  *    (calls handleTableClick — event delegation for edit and delete).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
+  try {
+    const response = await fetch('./api/index.php');
+    const result = await response.json();
+    if (!result.success) {
+      alert('Failed to load assignments.');
+      return;
+    }
+    assignments = result.data;
+    renderTable();
+    assignmentForm.addEventListener('submit', handleAddAssignment);
+    assignmentsTbody.addEventListener('click', handleTableClick);
+  } catch {
+    alert('Could not connect to the server.');
+  }
 }
 
 // --- Initial Page Load ---

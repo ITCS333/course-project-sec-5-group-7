@@ -1,1 +1,74 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Portal</title>
+    <link rel="stylesheet" href="src/common/styles.css">
+    <script src="src/common/auth-guard.js"></script>
+</head>
+<body>
+
+    <header>
+        <h1>Course Portal</h1>
+        <nav>
+            <a id="login-link" href="src/auth/login.html">Login</a>
+            <button id="logout-btn" style="display:none;">Logout</button>
+        </nav>
+    </header>
+
+    <main>
+
+        <section>
+            <h2>Welcome</h2>
+            <p id="welcome-msg">Select a section below to get started.</p>
+        </section>
+
+        <section>
+            <h2>Student</h2>
+            <ul>
+                <li><a href="src/assignments/list.html">Assignments</a></li>
+                <li><a href="src/resources/list.html">Resources</a></li>
+                <li><a href="src/weekly/list.html">Weekly Content</a></li>
+                <li><a href="src/discussion/board.html">Discussion Board</a></li>
+            </ul>
+        </section>
+
+        <section id="admin-section" style="display:none;">
+            <h2>Admin</h2>
+            <ul>
+                <li><a href="src/admin/manage_users.html">Manage Users</a></li>
+                <li><a href="src/assignments/admin.html">Manage Assignments</a></li>
+                <li><a href="src/resources/admin.html">Manage Resources</a></li>
+                <li><a href="src/weekly/admin.html">Manage Weekly Content</a></li>
+            </ul>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Course Portal &mdash; Group 7</p>
+    </footer>
+
+    <script>
+        const stored = sessionStorage.getItem('user');
+        const user   = stored ? JSON.parse(stored) : null;
+
+        if (user) {
+            document.getElementById('login-link').style.display  = 'none';
+            document.getElementById('logout-btn').style.display  = 'inline';
+            document.getElementById('welcome-msg').textContent   = 'Welcome, ' + user.name + '!';
+
+            if (user.is_admin == 1) {
+                document.getElementById('admin-section').style.display = '';
+            }
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', function () {
+            sessionStorage.removeItem('user');
+            window.location.reload();
+        });
+    </script>
+
+</body>
+</html>

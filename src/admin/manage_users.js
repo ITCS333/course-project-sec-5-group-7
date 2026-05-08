@@ -20,22 +20,22 @@ let initialized = false;
 // the HTML document is parsed before this script runs.
 
 // TODO: Select the user table body element with id="user-table-body".
+const userTableBody = document.getElementById("user-table-body");
 
 // TODO: Select the "Add User" form with id="add-user-form".
+const addUserForm = document.getElementById("add-user-form");
 
 // TODO: Select the "Change Password" form with id="password-form".
+const changePasswordForm = document.getElementById("password-form");
 
 // TODO: Select the search input field with id="search-input".
+const searchInput = document.getElementById("search-input");
 
 // TODO: Select all table header (th) elements inside the thead of id="user-table".
+const tableHeaders = document.querySelectorAll("#user-table thead th");
 
 // --- Functions ---
 
-const userTableBody = document.getElementById("user-table-body");
-const addUserForm = document.getElementById("add-user-form");
-const changePasswordForm = document.getElementById("password-form")
-const searchInput = document.getElementById("search-input");
-const tableHeaders = document.querySelectorAll("#user-table thead th");
 /**
  * TODO: Implement the createUserRow function.
  * This function takes a user object { id, name, email, is_admin } and returns a <tr> element.

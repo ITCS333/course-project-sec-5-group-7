@@ -25,6 +25,7 @@
 // --- Element Selections ---
 // TODO: Select the section for the assignment list using its
 //       id 'assignment-list-section'.
+const assignmentListSection = document.getElementById('assignment-list-section');
 
 // --- Functions ---
 
@@ -54,7 +55,27 @@
  * the assignments table) so that details.js can read the id from the URL.
  */
 function createAssignmentArticle(assignment) {
-  // ... your implementation here ...
+  const article = document.createElement('article');
+
+  const h2 = document.createElement('h2');
+  h2.textContent = assignment.title;
+
+  const dueDateP = document.createElement('p');
+  dueDateP.textContent = 'Due: ' + assignment.due_date;
+
+  const descriptionP = document.createElement('p');
+  descriptionP.textContent = assignment.description;
+
+  const link = document.createElement('a');
+  link.href        = `details.html?id=${assignment.id}`;
+  link.textContent = 'View Details & Discussion';
+
+  article.appendChild(h2);
+  article.appendChild(dueDateP);
+  article.appendChild(descriptionP);
+  article.appendChild(link);
+
+  return article;
 }
 
 /**
@@ -71,7 +92,40 @@ function createAssignmentArticle(assignment) {
  *    - Append the returned <article> to the list section.
  */
 async function loadAssignments() {
-  // ... your implementation here ...
+  try {
+    const response = await fetch('./api/index.php');
+
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('API error response:', text);
+      assignmentListSection.textContent = `Server error (${response.status}). Check the console for details.`;
+      return;
+    }
+
+    let result;
+    try {
+      const text = await response.text();
+      console.log('Raw API response:', text);
+      result = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('JSON parse error — raw response logged above');
+      assignmentListSection.textContent = 'Server returned an invalid response. Check the console for details.';
+      return;
+    }
+
+    if (!result.success) {
+      assignmentListSection.textContent = result.message || 'Failed to load assignments.';
+      return;
+    }
+
+    assignmentListSection.innerHTML = '';
+    for (const assignment of result.data) {
+      assignmentListSection.appendChild(createAssignmentArticle(assignment));
+    }
+  } catch (networkErr) {
+    console.error('Network error:', networkErr);
+    assignmentListSection.textContent = 'Could not connect to the server.';
+  }
 }
 
 // --- Initial Page Load ---
