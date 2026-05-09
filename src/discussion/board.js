@@ -7,12 +7,11 @@ const topicListContainer = document.getElementById('topic-list-container');
 
 // --- Functions ---
 
-// Create an <article> for a topic
+// Create a single topic <article>
 function createTopicArticle(topic) {
   const article = document.createElement('article');
   article.classList.add('list-group-item', 'mb-3');
 
-  // Heading with link
   const h3 = document.createElement('h3');
   const link = document.createElement('a');
   link.href = `topic.html?id=${topic.id}`;
@@ -20,15 +19,11 @@ function createTopicArticle(topic) {
   h3.appendChild(link);
   article.appendChild(h3);
 
-  // Footer with metadata
   const footer = document.createElement('footer');
   footer.textContent = `Posted by: ${topic.author} on ${topic.created_at}`;
-  footer.classList.add('text-muted', 'mb-2');
   article.appendChild(footer);
 
-  // Action buttons
   const btnDiv = document.createElement('div');
-
   const editBtn = document.createElement('button');
   editBtn.textContent = 'Edit';
   editBtn.className = 'edit-btn btn btn-sm btn-secondary me-2';
@@ -49,24 +44,25 @@ function createTopicArticle(topic) {
 // Render all topics
 function renderTopics() {
   topicListContainer.innerHTML = '';
-  topics.forEach(t => topicListContainer.appendChild(createTopicArticle(t)));
+  topics.forEach(topic => {
+    topicListContainer.appendChild(createTopicArticle(topic));
+  });
 }
 
-// Handle form submit (create or update topic)
-async function handleCreateTopic(e) {
-  e.preventDefault();
+// Create or update topic
+async function handleCreateTopic(event) {
+  event.preventDefault();
+
   const subjectInput = document.getElementById('topic-subject');
   const messageInput = document.getElementById('topic-message');
   const submitBtn = document.getElementById('create-topic');
 
   const subject = subjectInput.value.trim();
   const message = messageInput.value.trim();
-  if (!subject || !message) {
-    alert('Subject and message cannot be empty.');
-    return;
-  }
+  if (!subject || !message) return;
 
   const editId = submitBtn.dataset.editId;
+
   if (editId) {
     // Update existing topic
     await handleUpdateTopic(parseInt(editId), { subject, message });
@@ -83,9 +79,8 @@ async function handleCreateTopic(e) {
         body: JSON.stringify({ subject, message, author: 'Student' })
       });
       const result = await res.json();
-
       if (result.success) {
-        // Fetch the full topic from API to get server timestamp
+        // Fetch the created topic to get DB timestamp
         const topicRes = await fetch(`./api/index.php?id=${result.id}`);
         const topicData = await topicRes.json();
         if (topicData.success) {
@@ -93,8 +88,6 @@ async function handleCreateTopic(e) {
           renderTopics();
           subjectInput.value = '';
           messageInput.value = '';
-        } else {
-          alert('Topic created but failed to fetch its details.');
         }
       } else {
         alert(result.message || 'Failed to create topic');
@@ -128,13 +121,12 @@ async function handleUpdateTopic(id, fields) {
   }
 }
 
-// Handle clicks on topic list (edit/delete) with safe delegation
-async function handleTopicListClick(e) {
-  const btn = e.target.closest('button');
-  if (!btn) return;
+// Handle edit/delete button clicks
+async function handleTopicListClick(event) {
+  const target = event.target;
 
-  if (btn.classList.contains('delete-btn')) {
-    const id = parseInt(btn.dataset.id);
+  if (target.classList.contains('delete-btn')) {
+    const id = parseInt(target.dataset.id);
     if (!confirm('Are you sure you want to delete this topic?')) return;
 
     try {
@@ -143,16 +135,14 @@ async function handleTopicListClick(e) {
       if (result.success) {
         topics = topics.filter(t => t.id !== id);
         renderTopics();
-      } else {
-        alert(result.message || 'Failed to delete topic');
-      }
+      } else alert(result.message);
     } catch (err) {
       console.error(err);
       alert('Error deleting topic');
     }
 
-  } else if (btn.classList.contains('edit-btn')) {
-    const id = parseInt(btn.dataset.id);
+  } else if (target.classList.contains('edit-btn')) {
+    const id = parseInt(target.dataset.id);
     const topic = topics.find(t => t.id === id);
     if (!topic) return;
 
@@ -165,7 +155,7 @@ async function handleTopicListClick(e) {
   }
 }
 
-// Load all topics from API and initialize event listeners
+// Load topics and initialize event listeners
 async function loadAndInitialize() {
   try {
     const res = await fetch('./api/index.php');
@@ -173,6 +163,7 @@ async function loadAndInitialize() {
     if (result.success) {
       topics = result.data;
       renderTopics();
+
       newTopicForm.addEventListener('submit', handleCreateTopic);
       topicListContainer.addEventListener('click', handleTopicListClick);
     } else {
