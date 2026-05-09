@@ -97,36 +97,94 @@ function createTopic(PDO $db, array $data): void {
 }
 
 // ============================================================================
+// REPLIES FUNCTIONS
+// ============================================================================
+
+function getRepliesByTopicId(PDO $db, $topicId): void {
+    if (!is_numeric($topicId)) sendResponse(['success' => false, 'message' => 'Invalid topic id'], 400);
+
+    $stmt = $db->prepare("SELECT id, topic_id, text, author, created_at FROM replies WHERE topic_id = ? ORDER BY created_at ASC");
+    $stmt->execute([$topicId]);
+    $replies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    sendResponse(['success' => true, 'data' => $replies]);
+}
+
+function createReply(PDO $db, array $data): void {
+    if (empty($data['topic_id']) || empty($data['text']) || empty($data['author'])) {
+        sendResponse(['success' => false, 'message' => 'Missing fields'], 400);
+    }
+    $topic_id = (int)$data['topic_id'];
+    $text     = sanitizeInput($data['text']);
+    $author   = sanitizeInput($data['author']);
+
+    // check if topic exists
+    $check = $db->prepare("SELECT id FROM topics WHERE id = ?");
+    $check->execute([$topic_id]);
+    if (!$check->fetch()) sendResponse(['success'=>false,'message'=>'Topic not found'], 404);
+
+    $stmt = $db->prepare("INSERT INTO replies (topic_id, text, author) VALUES (?, ?, ?)");
+    if ($stmt->execute([$topic_id, $text, $author])) {
+        $id = (int)$db->lastInsertId();
+        sendResponse(['success'=>true,'message'=>'Reply created','id'=>$id,'data'=>[
+            'id'=>$id, 'topic_id'=>$topic_id, 'text'=>$text, 'author'=>$author
+        ]], 201);
+    } else {
+        sendResponse(['success'=>false,'message'=>'Failed to create reply'], 500);
+    }
+}
+
+function updateTopic(PDO $db, array $data): void {
+    if (empty($data['id'])) sendResponse(['success'=>false,'message'=>'Topic id required'], 400);
+
+    $id = (int)$data['id'];
+    $fields = [];
+    $params = [];
+
+    if (!empty($data['subject'])) { $fields[]='subject=:subject'; $params[':subject']=sanitizeInput($data['subject']); }
+    if (!empty($data['message'])) { $fields[]='message=:message'; $params[':message']=sanitizeInput($data['message']); }
+
+    if (empty($fields)) sendResponse(['success'=>false,'message'=>'No fields to update'],400);
+
+    $params[':id']=$id;
+    $stmt = $db->prepare("UPDATE topics SET ".implode(',',$fields)." WHERE id=:id");
+    if ($stmt->execute($params)) sendResponse(['success'=>true,'message'=>'Topic updated']);
+    else sendResponse(['success'=>false,'message'=>'Failed to update topic'],500);
+}
+
+function deleteTopic(PDO $db, $id): void {
+    if (!is_numeric($id)) sendResponse(['success'=>false,'message'=>'Invalid topic id'],400);
+    $stmt = $db->prepare("DELETE FROM topics WHERE id = ?");
+    if ($stmt->execute([$id])) sendResponse(['success'=>true,'message'=>'Topic deleted']);
+    else sendResponse(['success'=>false,'message'=>'Failed to delete topic'],500);
+}
+
+function deleteReply(PDO $db, $id): void {
+    if (!is_numeric($id)) sendResponse(['success'=>false,'message'=>'Invalid reply id'],400);
+    $stmt = $db->prepare("DELETE FROM replies WHERE id = ?");
+    if ($stmt->execute([$id])) sendResponse(['success'=>true,'message'=>'Reply deleted']);
+    else sendResponse(['success'=>false,'message'=>'Failed to delete reply'],500);
+}
+
+// ============================================================================
 // MAIN ROUTER
 // ============================================================================
 
 try {
     if ($method === 'GET') {
-        if ($action === 'replies' && $topicId) {
-            getRepliesByTopicId($db, $topicId);
-        } elseif ($id) {
-            getTopicById($db, $id);
-        } else {
-            getAllTopics($db);
-        }
+        if ($action === 'replies' && $topicId) getRepliesByTopicId($db, $topicId);
+        elseif ($id) getTopicById($db, $id);
+        else getAllTopics($db);
     } elseif ($method === 'POST') {
-        if ($action === 'reply') {
-            createReply($db, $data);
-        } else {
-            createTopic($db, $data);
-        }
-    } elseif ($method === 'PUT') {
-        updateTopic($db, $data);
-    } elseif ($method === 'DELETE') {
-        if ($action === 'delete_reply') {
-            deleteReply($db, $id);
-        } else {
-            deleteTopic($db, $id);
-        }
-    } else {
-        sendResponse(['success' => false, 'message' => 'Method Not Allowed'], 405);
-    }
+        if ($action==='reply') createReply($db,$data);
+        else createTopic($db,$data);
+    } elseif ($method==='PUT') updateTopic($db,$data);
+    elseif ($method==='DELETE') {
+        if ($action==='delete_reply') deleteReply($db,$id);
+        else deleteTopic($db,$id);
+    } else sendResponse(['success'=>false,'message'=>'Method Not Allowed'],405);
 } catch (Exception $e) {
     error_log($e->getMessage());
-    sendResponse(['success' => false, 'message' => 'Internal Server Error'], 500);
+    sendResponse(['success'=>false,'message'=>'Internal Server Error'],500);
 }
+?>
