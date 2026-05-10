@@ -13,9 +13,41 @@
 
 <main>
 
-    <section id="resource-form-section"></section>
+    <!-- FORM SECTION -->
+    <section id="resource-form-section">
 
-    <section id="resource-table-section"></section>
+        <form id="resource-form">
+
+            <input type="hidden" id="resource-id">
+
+            <label>Title</label>
+            <input type="text" id="title" required>
+
+            <label>Description</label>
+            <textarea id="description"></textarea>
+
+            <label>Link</label>
+            <input type="url" id="link" required>
+
+            <button type="submit">Save</button>
+
+        </form>
+
+    </section>
+
+    <!-- TABLE/LIST SECTION -->
+    <section id="resource-table-section">
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Link</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="resource-table-body"></tbody>
+        </table>
+    </section>
 
 </main>
 
