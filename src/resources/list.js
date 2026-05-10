@@ -1,38 +1,33 @@
-const tbody = document.querySelector("#resources-table-body");
-
-function createRow(resource) {
-    const tr = document.createElement("tr");
-
-    const titleTd = document.createElement("td");
-    titleTd.textContent = resource.title;
-
-    const actionTd = document.createElement("td");
-
-    const link = document.createElement("a");
-    link.textContent = "View";
-    link.href = `details.html?id=${resource.id}`;
-
-    actionTd.appendChild(link);
-
-    tr.appendChild(titleTd);
-    tr.appendChild(actionTd);
-
-    return tr;
+const resourceListSection = document.querySelector(
+  "#resource-list-section"
+);
+ 
+function createResourceArticle(resource) {
+  const article = document.createElement("article");
+ 
+  article.innerHTML = `
+  <h2>${resource.title}</h2>
+  <p>${resource.description || ""}</p>
+  <a href="details.html?id=${resource.id}">
+    View Resource & Discussion
+  </a>
+`;
+ 
+  return article;
 }
-
+ 
 async function loadResources() {
-    const res = await fetch("./api/index.php");
-    const result = await res.json();
-
-    tbody.innerHTML = "";
-
-    if (result.success) {
-        result.data.forEach(r => {
-            tbody.appendChild(createRow(r));
-        });
-    } else {
-        console.error(result.message);
-    }
+  const response = await fetch("./api/index.php");
+  const result = await response.json();
+ 
+  resourceListSection.innerHTML = "";
+ 
+  if (result.success && result.data) {
+    result.data.forEach((resource) => {
+      const article = createResourceArticle(resource);
+      resourceListSection.appendChild(article);
+    });
+  }
 }
-
+ 
 loadResources();
