@@ -6,15 +6,15 @@ function createResourceArticle(resource) {
   const title = document.createElement("h2");
   title.textContent = resource.title;
 
-  const desc = document.createElement("p");
-  desc.textContent = resource.description;
+  const description = document.createElement("p");
+  description.textContent = resource.description;
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;
   link.textContent = "View Resource & Discussion";
+  link.href = `details.html?id=${resource.id}`;
 
   article.appendChild(title);
-  article.appendChild(desc);
+  article.appendChild(description);
   article.appendChild(link);
 
   return article;
@@ -22,12 +22,14 @@ function createResourceArticle(resource) {
 
 async function loadResources() {
   const res = await fetch("./api/index.php");
-  const result = await res.json();
+  const data = await res.json();
 
   resourceListSection.innerHTML = "";
 
-  for (let i = 0; i < result.data.length; i++) {
-    resourceListSection.appendChild(createResourceArticle(result.data[i]));
+  if (data.success) {
+    data.data.forEach(resource => {
+      resourceListSection.appendChild(createResourceArticle(resource));
+    });
   }
 }
 
