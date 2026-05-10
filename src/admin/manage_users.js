@@ -130,8 +130,13 @@ function handleChangePassword(event) {
     return;
   }
 
-  const storedUser = sessionStorage.getItem('user');
+  const storedUser = window.sessionStorage ? window.sessionStorage.getItem('user') : null;
   const adminId = storedUser ? JSON.parse(storedUser).id : null;
+
+  document.getElementById("current-password").value = "";
+  document.getElementById("new-password").value = "";
+  document.getElementById("confirm-password").value = "";
+
   if (!adminId) { alert('You must be logged in to change your password.'); return; }
 
   fetch("api/index.php?action=change_password", {
@@ -147,9 +152,6 @@ function handleChangePassword(event) {
     .then(function (result) {
       if (result.success) {
         alert("Password updated successfully!");
-        document.getElementById("current-password").value = "";
-        document.getElementById("new-password").value = "";
-        document.getElementById("confirm-password").value = "";
       } else {
         alert(result.message);
       }
