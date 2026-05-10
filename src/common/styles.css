@@ -1,6 +1,3 @@
-/* ============================================================
-   CSS Custom Properties — Y2K CYBER EDITION
-   ============================================================ */
 :root {
   --cyan:    #00e5ff;
   --magenta: #ff006e;
@@ -44,9 +41,7 @@
   --font-display: 'Arial Black', 'Impact', 'Arial', sans-serif;
 }
 
-/* ============================================================
-   Reset & Base
-   ============================================================ */
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -72,7 +67,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scanline overlay */
 body::before {
   content: '';
   position: fixed;
@@ -88,9 +82,7 @@ body::before {
   z-index: 9998;
 }
 
-/* ============================================================
-   Keyframe Animations
-   ============================================================ */
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -126,9 +118,7 @@ body::before {
 
 main { animation: fadeIn 0.35s ease both; }
 
-/* ============================================================
-   Typography
-   ============================================================ */
+
 h1, h2, h3 {
   font-family: var(--font-display);
   font-weight: 900;
@@ -182,9 +172,7 @@ a:hover {
   text-decoration: none;
 }
 
-/* ============================================================
-   Header & Nav — Chrome Metallic
-   ============================================================ */
+
 header {
   background: var(--color-surface);
   padding: 0.85rem 2rem;
@@ -247,9 +235,7 @@ nav {
   text-shadow: 0 0 8px var(--cyan);
 }
 
-/* ============================================================
-   Section Nav Bar
-   ============================================================ */
+
 .section-nav {
   display: flex;
   align-items: stretch;
@@ -302,9 +288,6 @@ nav {
   text-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
 }
 
-/* ============================================================
-   Main Layout
-   ============================================================ */
 main {
   max-width: 960px;
   margin: 2rem auto;
@@ -325,9 +308,7 @@ footer {
   margin-top: 2.5rem;
 }
 
-/* ============================================================
-   Section / Card — Y2K Neon Panel
-   ============================================================ */
+
 section, article {
   position: relative;
   background: var(--color-surface);
@@ -340,7 +321,6 @@ section, article {
   scroll-margin-top: 80px;
 }
 
-/* Corner bracket — top-left */
 section::before, article::before {
   content: '';
   position: absolute;
@@ -353,7 +333,6 @@ section::before, article::before {
   transition: width var(--transition), height var(--transition), opacity var(--transition);
 }
 
-/* Corner bracket — bottom-right */
 section::after, article::after {
   content: '';
   position: absolute;
@@ -377,9 +356,7 @@ article:hover::before, article:hover::after {
   opacity: 1;
 }
 
-/* ============================================================
-   Index Page — Welcome & Navigation Sections
-   ============================================================ */
+
 #welcome-msg {
   font-size: 0.875rem;
   color: var(--color-text-muted);
@@ -448,9 +425,6 @@ main > section ul li a:hover::before { opacity: 1; }
 main > section ul li a span,
 main > section ul li a { position: relative; z-index: 1; }
 
-/* ============================================================
-   Admin Section (index.html)
-   ============================================================ */
 #admin-section {
   border-left: 3px solid var(--magenta);
   box-shadow: var(--shadow-sm), -2px 0 10px rgba(255, 0, 110, 0.15);
@@ -461,9 +435,6 @@ main > section ul li a { position: relative; z-index: 1; }
   text-shadow: 0 0 10px rgba(255, 0, 110, 0.5);
 }
 
-/* ============================================================
-   Forms — Fieldset, Legend, Labels, Inputs
-   ============================================================ */
 form { width: 100%; }
 
 fieldset {
@@ -553,9 +524,7 @@ select {
   padding-right: 2.5rem;
 }
 
-/* ============================================================
-   Buttons — Neon Glow Style
-   ============================================================ */
+
 button, [type="submit"] {
   display: inline-flex;
   align-items: center;
@@ -580,7 +549,6 @@ button, [type="submit"] {
   text-shadow: 0 0 6px rgba(0, 229, 255, 0.5);
 }
 
-/* Gloss sheen */
 button::before {
   content: '';
   position: absolute;
@@ -610,7 +578,6 @@ button:active {
   box-shadow: 0 0 6px rgba(0, 229, 255, 0.3), inset 0 0 6px rgba(0, 229, 255, 0.1);
 }
 
-/* Logout button — magenta chrome in header */
 #logout-btn {
   color: var(--magenta);
   -webkit-text-fill-color: var(--magenta);
@@ -637,7 +604,6 @@ button:active {
   -webkit-text-fill-color: #fff;
 }
 
-/* Edit button — neon green */
 .edit-btn {
   color: var(--green);
   border-color: var(--green);
@@ -657,7 +623,6 @@ button:active {
   text-shadow: 0 0 10px var(--green);
 }
 
-/* Delete button — neon red */
 .delete-btn {
   color: var(--color-danger);
   border-color: var(--color-danger);
@@ -677,9 +642,6 @@ button:active {
   text-shadow: 0 0 10px var(--color-danger);
 }
 
-/* ============================================================
-   Login Page
-   ============================================================ */
 body:has(#login-form) {
   display: flex;
   justify-content: center;
@@ -762,9 +724,6 @@ body:has(#login-form) h1 {
   animation: fadeInUp 0.2s ease both;
 }
 
-/* ============================================================
-   Assignment List Page
-   ============================================================ */
 #assignment-list-section {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -841,9 +800,6 @@ body:has(#login-form) h1 {
   text-decoration: none;
 }
 
-/* ============================================================
-   Assignment Details Page
-   ============================================================ */
 #assignment-due-date {
   display: inline-block;
   color: var(--cyan);
@@ -905,9 +861,6 @@ body:has(#login-form) h1 {
   text-shadow: 0 0 8px rgba(0, 229, 255, 0.35);
 }
 
-/* ============================================================
-   Discussion Forum
-   ============================================================ */
 #discussion-forum {
   border-top: 2px solid rgba(0, 229, 255, 0.4);
 }
@@ -951,9 +904,6 @@ body:has(#login-form) h1 {
   text-shadow: 0 0 5px rgba(255, 0, 110, 0.35);
 }
 
-/* ============================================================
-   Tables — Assignments Admin & Manage Users
-   ============================================================ */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1016,9 +966,6 @@ tbody td:last-child {
   align-items: center;
 }
 
-/* ============================================================
-   Admin — Manage Assignments Form
-   ============================================================ */
 #assignment-form section,
 #assignment-form {
   background: transparent;
@@ -1032,9 +979,6 @@ tbody td:last-child {
 #assignment-form section::before,
 #assignment-form section::after { display: none; }
 
-/* ============================================================
-   Admin — Manage Users Page
-   ============================================================ */
 #search-input {
   margin-bottom: 1rem;
   background-color: var(--color-bg-2);
@@ -1103,9 +1047,6 @@ details > *:not(summary) {
 
 #password-form fieldset { max-width: 480px; }
 
-/* ============================================================
-   Add / Edit Submit Buttons
-   ============================================================ */
 #add-assignment,
 #add,
 #change {
@@ -1113,9 +1054,6 @@ details > *:not(summary) {
   min-width: 130px;
 }
 
-/* ============================================================
-   Responsive
-   ============================================================ */
 @media (max-width: 640px) {
   header { padding: 0.75rem 1rem; }
 
@@ -1144,9 +1082,6 @@ details > *:not(summary) {
   main > section ul { grid-template-columns: 1fr; }
 }
 
-/* ============================================================
-   Scrollbar Styling
-   ============================================================ */
 ::-webkit-scrollbar        { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track  { background: var(--color-bg); }
 ::-webkit-scrollbar-thumb  { background: rgba(0, 229, 255, 0.3); border-radius: 0; }
