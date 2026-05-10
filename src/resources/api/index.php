@@ -14,16 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/../../common/db.php';
 
-$db = getDBConnection();
-
+$db     = getDBConnection();
 $method = $_SERVER['REQUEST_METHOD'];
-$input = json_decode(file_get_contents("php://input"), true) ?? [];
-
-$id = isset($_GET['id']) ? (int)$_GET['id'] : null;
-$action = $_GET['action'] ?? null;
+$input  = json_decode(file_get_contents("php://input"), true) ?? [];
+$id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
 /* =========================
-   RESPONSE (مرة واحدة فقط)
+   RESPONSE
 ========================= */
 function sendResponse($data, $status = 200) {
     http_response_code($status);
@@ -36,7 +33,8 @@ function sendResponse($data, $status = 200) {
     } else {
         echo json_encode([
             "success" => true,
-            "data" => $data
+            "message" => is_string($data) ? $data : "OK",
+            "data"    => is_string($data) ? null : $data
         ]);
     }
     exit;
@@ -61,23 +59,22 @@ function getAllResources($db) {
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    if (!$rows) {
-        $rows = [];
-    }
-
-    sendResponse($rows);
+    sendResponse($rows ?: []);
 }
 
 /* =========================
    GET BY ID
 ========================= */
 function getResourceById($db, $id) {
+    if (!$id || !is_numeric($id)) {
+        sendResponse("Invalid id", 400);
+    }
+
     $stmt = $db->prepare("
         SELECT id, title, description, link, created_at
         FROM resources
         WHERE id = :id
     ");
-
     $stmt->execute([':id' => $id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -92,7 +89,6 @@ function getResourceById($db, $id) {
    CREATE
 ========================= */
 function createResource($db, $input) {
-
     if (empty($input['title']) || empty($input['link'])) {
         sendResponse("Title and link are required", 400);
     }
@@ -105,29 +101,34 @@ function createResource($db, $input) {
         INSERT INTO resources (title, description, link)
         VALUES (:t, :d, :l)
     ");
-
     $stmt->execute([
-        ':t' => $input['title'],
-        ':d' => $input['description'] ?? '',
-        ':l' => $input['link']
+        ':t' => trim($input['title']),
+        ':d' => trim($input['description'] ?? ''),
+        ':l' => trim($input['link'])
     ]);
 
-    sendResponse(['id' => $db->lastInsertId()], 201);
+    sendResponse(['id' => (int)$db->lastInsertId()], 201);
 }
 
 /* =========================
    UPDATE
 ========================= */
 function updateResource($db, $input) {
-
-    if (empty($input['id'])) {
+    if (empty($input['id']) || !is_numeric($input['id'])) {
         sendResponse("Invalid id", 400);
     }
 
-    $stmt = $db->prepare("SELECT * FROM resources WHERE id = ?");
-    $stmt->execute([$input['id']]);
+    if (empty($input['title']) || empty($input['link'])) {
+        sendResponse("Title and link are required", 400);
+    }
 
-    if (!$stmt->fetch()) {
+    if (!validUrl($input['link'])) {
+        sendResponse("Invalid URL", 400);
+    }
+
+    $check = $db->prepare("SELECT id FROM resources WHERE id = ?");
+    $check->execute([$input['id']]);
+    if (!$check->fetch()) {
         sendResponse("Resource not found", 404);
     }
 
@@ -136,34 +137,42 @@ function updateResource($db, $input) {
         SET title = ?, description = ?, link = ?
         WHERE id = ?
     ");
-
     $stmt->execute([
-        $input['title'] ?? '',
-        $input['description'] ?? '',
-        $input['link'] ?? '',
-        $input['id']
+        trim($input['title']),
+        trim($input['description'] ?? ''),
+        trim($input['link']),
+        (int)$input['id']
     ]);
 
-    sendResponse("Resource updated successfully");
+    if ($stmt->rowCount() > 0) {
+        sendResponse("Resource updated successfully");
+    }
+
+    sendResponse("No changes were made");
 }
 
 /* =========================
    DELETE
 ========================= */
 function deleteResource($db, $id) {
-
-    if (!$id) {
+    if (!$id || !is_numeric($id)) {
         sendResponse("Invalid id", 400);
+    }
+
+    $check = $db->prepare("SELECT id FROM resources WHERE id = ?");
+    $check->execute([$id]);
+    if (!$check->fetch()) {
+        sendResponse("Resource not found", 404);
     }
 
     $stmt = $db->prepare("DELETE FROM resources WHERE id = ?");
     $stmt->execute([$id]);
 
-    if ($stmt->rowCount() === 0) {
-        sendResponse("Resource not found", 404);
+    if ($stmt->rowCount() > 0) {
+        sendResponse("Resource deleted successfully");
     }
 
-    sendResponse("Resource deleted successfully");
+    sendResponse("Delete failed", 500);
 }
 
 /* =========================
@@ -172,7 +181,6 @@ function deleteResource($db, $id) {
 try {
 
     if ($method === 'GET') {
-
         if ($id) {
             getResourceById($db, $id);
         } else {
@@ -180,15 +188,12 @@ try {
         }
 
     } elseif ($method === 'POST') {
-
         createResource($db, $input);
 
     } elseif ($method === 'PUT') {
-
         updateResource($db, $input);
 
     } elseif ($method === 'DELETE') {
-
         deleteResource($db, $id);
 
     } else {
@@ -199,5 +204,6 @@ try {
     error_log($e->getMessage());
     sendResponse("Database error", 500);
 } catch (Exception $e) {
+    error_log($e->getMessage());
     sendResponse("Server error", 500);
 }
