@@ -1,52 +1,36 @@
-const resourceListSection = document.querySelector("#resource-list");
-
-const searchInput = document.querySelector("#search-input");
-const sortSelect = document.querySelector("#sort-select");
-const orderSelect = document.querySelector("#order-select");
+const resourceListSection = document.querySelector("#resource-list-section");
 
 function createResourceArticle(resource) {
-    const li = document.createElement("li");
+    const article = document.createElement("article");
 
-    const title = document.createElement("h3");
+    const title = document.createElement("h2");
     title.textContent = resource.title;
 
     const description = document.createElement("p");
-    description.textContent = resource.description || "";
+    description.textContent = resource.description;
 
     const link = document.createElement("a");
-    link.textContent = "View Resource";
+    link.textContent = "View Resource & Discussion";
     link.href = `details.html?id=${resource.id}`;
 
-    li.appendChild(title);
-    li.appendChild(description);
-    li.appendChild(link);
+    article.appendChild(title);
+    article.appendChild(description);
+    article.appendChild(link);
 
-    return li;
+    return article;
 }
 
 async function loadResources() {
-    let url = "./api/index.php";
-
-    const search = searchInput?.value || "";
-    const sort = sortSelect?.value || "created_at";
-    const order = orderSelect?.value || "desc";
-
-    url += `?search=${search}&sort=${sort}&order=${order}`;
-
-    const response = await fetch(url);
-    const result = await response.json();
+    const res = await fetch("./api/index.php");
+    const result = await res.json();
 
     resourceListSection.innerHTML = "";
 
-    if (result.success && Array.isArray(result.data)) {
-        result.data.forEach(resource => {
-            resourceListSection.appendChild(createResourceArticle(resource));
+    if (result.success) {
+        result.data.forEach(r => {
+            resourceListSection.appendChild(createResourceArticle(r));
         });
     }
 }
-
-searchInput?.addEventListener("input", loadResources);
-sortSelect?.addEventListener("change", loadResources);
-orderSelect?.addEventListener("change", loadResources);
 
 loadResources();
