@@ -1,35 +1,37 @@
-const resourceListSection = document.querySelector("#resource-list-section");
+const tbody = document.querySelector("#resources-table-body");
 
-function createResourceArticle(resource) {
-    const article = document.createElement("article");
+function createRow(resource) {
+    const tr = document.createElement("tr");
 
-    const title = document.createElement("h2");
-    title.textContent = resource.title;
+    const titleTd = document.createElement("td");
+    titleTd.textContent = resource.title;
 
-    const description = document.createElement("p");
-    description.textContent = resource.description;
+    const actionTd = document.createElement("td");
 
     const link = document.createElement("a");
-    link.textContent = "View Resource & Discussion";
+    link.textContent = "View";
     link.href = `details.html?id=${resource.id}`;
 
-    article.appendChild(title);
-    article.appendChild(description);
-    article.appendChild(link);
+    actionTd.appendChild(link);
 
-    return article;
+    tr.appendChild(titleTd);
+    tr.appendChild(actionTd);
+
+    return tr;
 }
 
 async function loadResources() {
     const res = await fetch("./api/index.php");
     const result = await res.json();
 
-    resourceListSection.innerHTML = "";
+    tbody.innerHTML = "";
 
     if (result.success) {
         result.data.forEach(r => {
-            resourceListSection.appendChild(createResourceArticle(r));
+            tbody.appendChild(createRow(r));
         });
+    } else {
+        console.error(result.message);
     }
 }
 
