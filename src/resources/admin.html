@@ -2,65 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Manage Resources</title>
 
     <link rel="stylesheet" href="styles.css">
-
     <script src="admin.js" defer></script>
 </head>
 <body>
 
-    <header>
-        <h1>Manage Course Resources</h1>
-    </header>
+<header>
+    <h1>Manage Course Resources</h1>
+</header>
 
-    <main>
+<main>
 
-        <section>
-            <h2>Add a New Resource</h2>
+<section>
+    <h2>Add a New Resource</h2>
 
-            <form id="resource-form" action="#">
-                <fieldset>
-                    <legend>Resource Details</legend>
+    <form id="resource-form">
+        <fieldset>
+            <legend>Resource Details</legend>
 
-                    <label for="resource-title">Title</label>
-                    <input id="resource-title" type="text" required>
+            <label for="resource-title">Title</label>
+            <input id="resource-title" type="text" required>
 
-                    <label for="resource-description">Description</label>
-                    <textarea id="resource-description"></textarea>
+            <label for="resource-description">Description</label>
+            <textarea id="resource-description"></textarea>
 
-                    <label for="resource-link">Link</label>
-                    <input id="resource-link" type="url" required>
+            <label for="resource-link">Link</label>
+            <input id="resource-link" type="url" required>
 
-                    <button id="add-resource" type="submit">Add Resource</button>
+            <button id="add-resource" type="submit">Add Resource</button>
+        </fieldset>
+    </form>
+</section>
 
-                </fieldset>
-            </form>
-        </section>
+<section>
+    <h2>Existing Resources</h2>
 
-        <section>
-            <h2>Existing Resources</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Link</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
 
-            <table id="resources-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Link</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+        <tbody id="resources-tbody"></tbody>
+    </table>
+</section>
 
-                <tbody id="resources-tbody">
-
-                </tbody>
-            </table>
-        </section>
-
-    </main>
+</main>
 
 </body>
 </html>
