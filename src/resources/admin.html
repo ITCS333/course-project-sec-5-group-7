@@ -1,60 +1,84 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
-    
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Resources</title>
- 
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <script src="admin.js" defer></script>
+    <!-- Meta Tag for Character Encoding -->
+    <meta charset="UTF-8">
+
+    <!-- Meta Tag for Responsive Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title of the Page -->
+    <title>Manage Resources</title>
+
+    <!-- Link to External CSS Framework or Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Link to External JavaScript File -->
+    <script src="admin.js" defer></script>
 </head>
- 
 <body>
-    <header>
-        <h1>Manage Course Resources</h1>
-    </header>
- 
-    <main>
-        <section>
-            <h2>Add a New Resource</h2>
- 
-            <form id="resource-form" action="#">
-                <fieldset>
-                    <legend>Resource Details</legend>
- 
-                    <label for="resource-title">Resource Title</label>
-                    <input id="resource-title" type="text" required>
- 
-                    <label for="resource-description">Resource Description</label>
-                    <textarea id="resource-description"></textarea>
- 
-                    <label for="resource-link">Resource Link</label>
-                    <input id="resource-link" type="url" required>
- 
-                    <button id="add-resource" type="submit">Add Resource</button>
-                </fieldset>
-            </form>
-        </section>
- 
-        <section>
-            <h2>Existing Resources</h2>
- 
-            <table id="resources-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Link</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
- 
-                <tbody id="resources-tbody">
-                    <!-- Rows will be added by admin.js -->
-                </tbody>
-            </table>
-        </section>
-    </main>
+
+    <!-- Header Section -->
+    <header>
+        <h1>Manage Course Resources</h1>
+    </header>
+
+    <!-- Main Content Area -->
+    <main>
+
+        <!-- Section 1: Add/Edit Resource Form -->
+        <section>
+            <h2>Add a New Resource</h2>
+            <form id="resource-form" action="#">
+                <fieldset>
+                    <legend>Resource Details</legend>
+
+                    <!-- Resource Title -->
+                    <label for="resource-title">Resource Title:</label>
+                    <input id="resource-title" type="text" required>
+
+                    <!-- Resource Description -->
+                    <label for="resource-description">Resource Description:</label>
+                    <textarea id="resource-description"></textarea>
+
+                    <!-- Resource Link -->
+                    <label for="resource-link">Resource Link:</label>
+                    <input id="resource-link" type="url" required>
+
+                    <!-- Submit Button -->
+                    <button id="add-resource" type="submit">Add Resource</button>
+                </fieldset>
+            </form>
+        </section>
+
+        <!-- Section 2: Existing Resources List -->
+        <section>
+            <h2>Existing Resources</h2>
+
+            <table id="resources-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Link</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="resources-tbody">
+                    <!-- Dynamically Injected Rows by admin.js -->
+                    <tr>
+                        <td>Sample Resource Title</td>
+                        <td>Sample description for the resource.</td>
+                        <td><a href="http://example.com" target="_blank">Link</a></td>
+                        <td>
+                            <button class="edit-btn" data-id="1">Edit</button>
+                            <button class="delete-btn" data-id="1">Delete</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+    </main>
 </body>
 </html>
