@@ -1,28 +1,24 @@
-let currentResourceId = null;
+let currentResourceId = new URLSearchParams(window.location.search).get("id");
+
+const titleEl = document.querySelector("#resource-title");
+const descEl = document.querySelector("#resource-description");
+const linkEl = document.querySelector("#resource-link");
+const commentList = document.querySelector("#comment-list");
+const form = document.querySelector("#comment-form");
+const input = document.querySelector("#new-comment");
+
 let currentComments = [];
 
-// Element Selections
-const titleEl = document.getElementById("resource-title");
-const descEl = document.getElementById("resource-description");
-const linkEl = document.getElementById("resource-link");
-const commentListEl = document.getElementById("comment-list");
-const commentForm = document.getElementById("comment-form");
-const commentInput = document.getElementById("new-comment");
-
-// Get ID from URL
 function getResourceIdFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("id");
+  return currentResourceId;
 }
 
-// Render resource details
 function renderResourceDetails(resource) {
   titleEl.textContent = resource.title;
   descEl.textContent = resource.description;
   linkEl.href = resource.link;
 }
 
-// Create comment article
 function createCommentArticle(comment) {
   const article = document.createElement("article");
 
@@ -30,7 +26,7 @@ function createCommentArticle(comment) {
   p.textContent = comment.text;
 
   const footer = document.createElement("footer");
-  footer.textContent = `Posted by: ${comment.author}`;
+  footer.textContent = "Posted by: " + comment.author;
 
   article.appendChild(p);
   article.appendChild(footer);
@@ -38,72 +34,59 @@ function createCommentArticle(comment) {
   return article;
 }
 
-// Render comments
 function renderComments() {
-  commentListEl.innerHTML = "";
+  commentList.innerHTML = "";
 
-  currentComments.forEach(comment => {
-    commentListEl.appendChild(createCommentArticle(comment));
-  });
+  for (let i = 0; i < currentComments.length; i++) {
+    commentList.appendChild(createCommentArticle(currentComments[i]));
+  }
 }
 
-// Add comment
 async function handleAddComment(event) {
   event.preventDefault();
 
-  const commentText = commentInput.value.trim();
-  if (!commentText) return;
+  const text = input.value;
 
-  const response = await fetch("./api/index.php?action=comment", {
+  if (!text) return;
+
+  const res = await fetch("./api/index.php?action=comment", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       resource_id: currentResourceId,
       author: "Student",
-      text: commentText
+      text: text
     })
   });
 
-  const result = await response.json();
+  const result = await res.json();
 
-  currentComments.push(result);
+  currentComments.push(result.data);
+
   renderComments();
-
-  commentInput.value = "";
+  input.value = "";
 }
 
-// Initialize page
 async function initializePage() {
-  currentResourceId = getResourceIdFromURL();
+  const id = getResourceIdFromURL();
 
-  if (!currentResourceId) {
+  if (!id) {
     titleEl.textContent = "Resource not found.";
     return;
   }
 
-  const [resourceRes, commentsRes] = await Promise.all([
-    fetch(`./api/index.php?id=${currentResourceId}`),
-    fetch(`./api/index.php?resource_id=${currentResourceId}&action=comments`)
-  ]);
+  const res1 = await fetch(`./api/index.php?id=${id}`);
+  const res2 = await fetch(`./api/index.php?resource_id=${id}&action=comments`);
 
-  const resourceData = await resourceRes.json();
-  const commentsData = await commentsRes.json();
+  const data1 = await res1.json();
+  const data2 = await res2.json();
 
-  if (!resourceData.data) {
-    titleEl.textContent = "Resource not found.";
-    return;
-  }
+  currentComments = data2.data || [];
 
-  const resource = resourceData.data;
-
-  currentComments = commentsData.data || [];
-
-  renderResourceDetails(resource);
+  renderResourceDetails(data1.data);
   renderComments();
 
-  commentForm.addEventListener("submit", handleAddComment);
+  form.addEventListener("submit", handleAddComment);
 }
 
 initializePage();
