@@ -1,18 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+    
 <head>
-    <meta charset="UTF-8">
-    <title>Resource Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Details</title>
+ 
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="details.js" defer></script>
 </head>
+ 
 <body>
-
-<h1 id="resource-title"></h1>
-
-<p id="resource-description"></p>
-
-<a id="resource-link" href="#" target="_blank">Open</a>
-
-<script src="details.js"></script>
-
+    <header>
+        <h1 id="resource-title">Resource Details</h1>
+    </header>
+ 
+    <main>
+        <article>
+            <p id="resource-description"></p>
+ 
+            <a id="resource-link" href="#" target="_blank">
+                Access Resource Material
+            </a>
+        </article>
+ 
+        <section id="discussion-forum">
+            <h2>Discussion</h2>
+ 
+            <div id="comment-list">
+                <!-- Comments will be added by details.js -->
+            </div>
+ 
+            <form id="comment-form" action="#">
+                <fieldset>
+                    <legend>Leave a Comment</legend>
+ 
+                    <label for="new-comment">Comment</label>
+                    <textarea id="new-comment" required></textarea>
+ 
+                    <button type="submit">Post Comment</button>
+                </fieldset>
+            </form>
+        </section>
+    </main>
 </body>
 </html>
