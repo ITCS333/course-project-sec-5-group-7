@@ -102,16 +102,7 @@ async function loadAssignments() {
       return;
     }
 
-    let result;
-    try {
-      const text = await response.text();
-      console.log('Raw API response:', text);
-      result = JSON.parse(text);
-    } catch (parseErr) {
-      console.error('JSON parse error — raw response logged above');
-      assignmentListSection.textContent = 'Server returned an invalid response. Check the console for details.';
-      return;
-    }
+    const result = await response.json();
 
     if (!result.success) {
       assignmentListSection.textContent = result.message || 'Failed to load assignments.';
