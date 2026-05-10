@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Resources</title>
 </head>
+
 <body>
 
 <header>
@@ -13,8 +14,10 @@
 
 <main>
 
+    
     <section id="resource-form-section">
-        <form id="resource-form">
+
+        <form id="add-resource-form">
 
             <label>Title</label>
             <input type="text" id="resource-title" required>
@@ -23,14 +26,17 @@
             <input type="text" id="resource-description">
 
             <label>Link</label>
-            <input type="url" id="resource-link" required>
+            <input type="text" id="resource-link" required>
 
             <button type="submit">Add Resource</button>
 
         </form>
+
     </section>
 
+
     <section id="resource-table-section">
+
         <table border="1">
             <thead>
                 <tr>
@@ -40,13 +46,18 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="resources-tbody"></tbody>
+
+            
+            <tbody id="resources-table-body"></tbody>
+
         </table>
+
     </section>
 
 </main>
 
-<script src="admin.js" defer></script>
+
+<script src="resources.js" defer></script>
 
 </body>
 </html>
