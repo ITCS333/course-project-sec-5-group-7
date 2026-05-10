@@ -1,303 +1,240 @@
 <?php
-ini_set('display_errors', '0');
-error_reporting(E_ALL);
-
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-require_once __DIR__ . '/../../common/db.php';
-
-$method = $_SERVER['REQUEST_METHOD'];
-
-$raw  = file_get_contents('php://input');
-$data = json_decode($raw, true) ?? [];
-
-$id     = isset($_GET['id']) ? (int)$_GET['id'] : null;
-$action = $_GET['action'] ?? null;
-$search = $_GET['search'] ?? null;
-$sort   = $_GET['sort'] ?? null;
-$order  = strtolower($_GET['order'] ?? 'asc');
-
+header("Content-Type: application/json");
+ 
+require_once __DIR__ . "/db.php";
 $db = getDBConnection();
-
-/* =========================
-   RESPONSE
-========================= */
-function sendResponse($data, $statusCode = 200) {
-    http_response_code($statusCode);
-
-    if ($statusCode >= 400) {
-        echo json_encode([
-            "success" => false,
-            "message" => $data
-        ]);
-    } else {
-        echo json_encode([
-            "success" => true,
-            "data" => $data
-        ]);
-    }
-    exit;
+ 
+$method = $_SERVER["REQUEST_METHOD"] ?? "GET";
+$input = json_decode(file_get_contents("php://input"), true) ?? [];
+ 
+function sendResponse(array $data, int $statusCode = 200): void {
+    http_response_code($statusCode);
+    echo json_encode($data);
+    exit;
 }
-
-/* =========================
-   HELPERS
-========================= */
-function validateEmail($email) {
-    return filter_var($email, FILTER_VALIDATE_EMAIL);
+ 
+function validUrl(string $url): bool {
+    return filter_var($url, FILTER_VALIDATE_URL) !== false;
 }
-
-function sanitizeInput($data) {
-    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
-}
-
-/* =========================
-   GET ALL USERS
-========================= */
-function getUsers($db) {
-    global $search, $sort, $order;
-
-    $sql = "SELECT id, name, email, is_admin, created_at FROM users";
-    $params = [];
-
-    if (!empty($search)) {
-        $sql .= " WHERE name LIKE :search OR email LIKE :search";
-        $params[':search'] = "%$search%";
-    }
-
-    $allowedSort = ['name', 'email', 'is_admin'];
-
-    if (!empty($sort) && in_array($sort, $allowedSort, true)) {
-        $dir = ($order === 'desc') ? 'DESC' : 'ASC';
-        $sql .= " ORDER BY $sort $dir";
-    }
-
-    $stmt = $db->prepare($sql);
-    $stmt->execute($params);
-
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    sendResponse($rows);
-}
-
-/* =========================
-   GET ONE USER
-========================= */
-function getUserById($db, $id) {
-    $stmt = $db->prepare("SELECT id, name, email, is_admin, created_at FROM users WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$row) {
-        sendResponse("User not found.", 404);
-    }
-
-    sendResponse($row);
-}
-
-/* =========================
-   CREATE USER
-========================= */
-function createUser($db, $data) {
-
-    if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
-        sendResponse("Name, email, and password are required.", 400);
-    }
-
-    $name  = sanitizeInput($data['name']);
-    $email = sanitizeInput($data['email']);
-    $pass  = $data['password'];
-
-    if (!validateEmail($email)) {
-        sendResponse("Invalid email address.", 400);
-    }
-
-    if (strlen($pass) < 8) {
-        sendResponse("Password must be at least 8 characters.", 400);
-    }
-
-    $check = $db->prepare("SELECT id FROM users WHERE email = :email");
-    $check->execute([':email' => $email]);
-
-    if ($check->fetch()) {
-        sendResponse("Email already exists.", 409);
-    }
-
-    $hash = password_hash($pass, PASSWORD_DEFAULT);
-    $isAdmin = !empty($data['is_admin']) ? 1 : 0;
-
-    $stmt = $db->prepare("
-        INSERT INTO users (name, email, password, is_admin)
-        VALUES (:name, :email, :password, :is_admin)
-    ");
-
-    $stmt->execute([
-        ':name' => $name,
-        ':email' => $email,
-        ':password' => $hash,
-        ':is_admin' => $isAdmin
-    ]);
-
-    sendResponse((int)$db->lastInsertId(), 201);
-}
-
-/* =========================
-   UPDATE USER
-========================= */
-function updateUser($db, $data) {
-
-    if (empty($data['id'])) {
-        sendResponse("User id required.", 400);
-    }
-
-    $id = (int)$data['id'];
-
-    $check = $db->prepare("SELECT id FROM users WHERE id = :id");
-    $check->execute([':id' => $id]);
-
-    if (!$check->fetch()) {
-        sendResponse("User not found.", 404);
-    }
-
-    $fields = [];
-    $params = [':id' => $id];
-
-    if (!empty($data['name'])) {
-        $fields[] = "name = :name";
-        $params[':name'] = sanitizeInput($data['name']);
-    }
-
-    if (!empty($data['email'])) {
-        $email = sanitizeInput($data['email']);
-
-        $dup = $db->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
-        $dup->execute([':email' => $email, ':id' => $id]);
-
-        if ($dup->fetch()) {
-            sendResponse("Email already in use.", 409);
-        }
-
-        $fields[] = "email = :email";
-        $params[':email'] = $email;
-    }
-
-    if (isset($data['is_admin'])) {
-        $fields[] = "is_admin = :is_admin";
-        $params[':is_admin'] = $data['is_admin'] ? 1 : 0;
-    }
-
-    if (empty($fields)) {
-        sendResponse("No fields to update.", 400);
-    }
-
-    $sql = "UPDATE users SET " . implode(", ", $fields) . " WHERE id = :id";
-
-    $stmt = $db->prepare($sql);
-    $stmt->execute($params);
-
-    sendResponse("User updated successfully.");
-}
-
-/* =========================
-   DELETE USER
-========================= */
-function deleteUser($db, $id) {
-
-    if (!$id) {
-        sendResponse("User id required.", 400);
-    }
-
-    $check = $db->prepare("SELECT id FROM users WHERE id = :id");
-    $check->execute([':id' => $id]);
-
-    if (!$check->fetch()) {
-        sendResponse("User not found.", 404);
-    }
-
-    $stmt = $db->prepare("DELETE FROM users WHERE id = :id");
-    $stmt->execute([':id' => $id]);
-
-    sendResponse("User deleted successfully.");
-}
-
-/* =========================
-   CHANGE PASSWORD
-========================= */
-function changePassword($db, $data) {
-
-    if (empty($data['id']) || empty($data['current_password']) || empty($data['new_password'])) {
-        sendResponse("Missing fields.", 400);
-    }
-
-    if (strlen($data['new_password']) < 8) {
-        sendResponse("Password must be at least 8 characters.", 400);
-    }
-
-    $stmt = $db->prepare("SELECT password FROM users WHERE id = :id");
-    $stmt->execute([':id' => (int)$data['id']]);
-
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        sendResponse("User not found.", 404);
-    }
-
-    if (!password_verify($data['current_password'], $user['password'])) {
-        sendResponse("Incorrect password.", 401);
-    }
-
-    $newHash = password_hash($data['new_password'], PASSWORD_DEFAULT);
-
-    $update = $db->prepare("UPDATE users SET password = :p WHERE id = :id");
-    $update->execute([
-        ':p' => $newHash,
-        ':id' => (int)$data['id']
-    ]);
-
-    sendResponse("Password updated successfully.");
-}
-
-/* =========================
-   ROUTER
-========================= */
-
+ 
 try {
-
-    if ($method === 'GET') {
-        if ($id) {
-            getUserById($db, $id);
-        } else {
-            getUsers($db);
-        }
-
-    } elseif ($method === 'POST') {
-        if ($action === 'change_password') {
-            changePassword($db, $data);
-        } else {
-            createUser($db, $data);
-        }
-
-    } elseif ($method === 'PUT') {
-        updateUser($db, $data);
-
-    } elseif ($method === 'DELETE') {
-        deleteUser($db, $id);
-
-    } else {
-        sendResponse("Method not allowed.", 405);
-    }
-
-} catch (PDOException $e) {
-    error_log($e->getMessage());
-    sendResponse("Database error.", 500);
+    $action = $_GET["action"] ?? null;
+    $id = $_GET["id"] ?? null;
+    $resourceId = $_GET["resource_id"] ?? null;
+    $commentId = $_GET["comment_id"] ?? null;
+ 
+    if ($method === "GET") {
+        if ($action === "comments") {
+            if (!$resourceId || !is_numeric($resourceId)) {
+                sendResponse(["success" => false, "message" => "Invalid resource id."], 400);
+            }
+ 
+            $stmt = $db->prepare("
+                SELECT id, resource_id, author, text, created_at
+                FROM comments_resource
+                WHERE resource_id = ?
+                ORDER BY created_at ASC
+            ");
+            $stmt->execute([$resourceId]);
+ 
+            sendResponse([
+                "success" => true,
+                "data" => $stmt->fetchAll(PDO::FETCH_ASSOC)
+            ]);
+        }
+ 
+        if ($id !== null) {
+            if (!is_numeric($id)) {
+                sendResponse(["success" => false, "message" => "Invalid resource id."], 400);
+            }
+ 
+            $stmt = $db->prepare("
+                SELECT id, title, description, link, created_at
+                FROM resources
+                WHERE id = ?
+            ");
+            $stmt->execute([$id]);
+            $resource = $stmt->fetch(PDO::FETCH_ASSOC);
+ 
+            if (!$resource) {
+                sendResponse(["success" => false, "message" => "Resource not found."], 404);
+            }
+ 
+            sendResponse(["success" => true, "data" => $resource]);
+        }
+ 
+        $sql = "SELECT id, title, description, link, created_at FROM resources";
+        $params = [];
+ 
+        if (!empty($_GET["search"])) {
+            $sql .= " WHERE title LIKE ? OR description LIKE ?";
+            $search = "%" . $_GET["search"] . "%";
+            $params = [$search, $search];
+        }
+ 
+        $sort = $_GET["sort"] ?? "created_at";
+        $order = strtolower($_GET["order"] ?? "desc");
+ 
+        if (!in_array($sort, ["title", "created_at"], true)) {
+            $sort = "created_at";
+        }
+ 
+        if (!in_array($order, ["asc", "desc"], true)) {
+            $order = "desc";
+        }
+ 
+        $sql .= " ORDER BY {$sort} {$order}";
+ 
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+ 
+        sendResponse([
+            "success" => true,
+            "data" => $stmt->fetchAll(PDO::FETCH_ASSOC)
+        ]);
+    }
+ 
+    if ($method === "POST") {
+        if ($action === "comment") {
+            if (
+                empty($input["resource_id"]) ||
+                empty($input["author"]) ||
+                empty($input["text"])
+            ) {
+                sendResponse(["success" => false, "message" => "Missing required fields."], 400);
+            }
+ 
+            if (!is_numeric($input["resource_id"])) {
+                sendResponse(["success" => false, "message" => "Invalid resource id."], 400);
+            }
+ 
+            $stmt = $db->prepare("SELECT id FROM resources WHERE id = ?");
+            $stmt->execute([$input["resource_id"]]);
+ 
+            if (!$stmt->fetch(PDO::FETCH_ASSOC)) {
+                sendResponse(["success" => false, "message" => "Resource not found."], 404);
+            }
+ 
+            $author = trim((string)$input["author"]);
+            $text = trim((string)$input["text"]);
+ 
+            $stmt = $db->prepare("
+                INSERT INTO comments_resource (resource_id, author, text)
+                VALUES (?, ?, ?)
+            ");
+            $stmt->execute([$input["resource_id"], $author, $text]);
+ 
+            sendResponse([
+                "success" => true,
+                "id" => $db->lastInsertId()
+            ], 201);
+        }
+ 
+        if (empty($input["title"]) || empty($input["link"])) {
+            sendResponse(["success" => false, "message" => "Title and link are required."], 400);
+        }
+ 
+        $title = trim((string)$input["title"]);
+        $description = trim((string)($input["description"] ?? ""));
+        $link = trim((string)$input["link"]);
+ 
+        if (!validUrl($link)) {
+            sendResponse(["success" => false, "message" => "Invalid URL."], 400);
+        }
+ 
+        $stmt = $db->prepare("
+            INSERT INTO resources (title, description, link)
+            VALUES (?, ?, ?)
+        ");
+        $stmt->execute([$title, $description, $link]);
+ 
+        sendResponse([
+            "success" => true,
+            "id" => $db->lastInsertId()
+        ], 201);
+    }
+ 
+    if ($method === "PUT") {
+        if (empty($input["id"]) || !is_numeric($input["id"])) {
+            sendResponse(["success" => false, "message" => "Invalid resource id."], 400);
+        }
+ 
+        $stmt = $db->prepare("SELECT * FROM resources WHERE id = ?");
+        $stmt->execute([$input["id"]]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+ 
+        if (!$existing) {
+            sendResponse(["success" => false, "message" => "Resource not found."], 404);
+        }
+ 
+        $title = array_key_exists("title", $input)
+            ? trim((string)$input["title"])
+            : $existing["title"];
+ 
+        $description = array_key_exists("description", $input)
+            ? trim((string)$input["description"])
+            : $existing["description"];
+ 
+        $link = array_key_exists("link", $input)
+            ? trim((string)$input["link"])
+            : $existing["link"];
+ 
+        if (array_key_exists("link", $input) && !validUrl($link)) {
+            sendResponse(["success" => false, "message" => "Invalid URL."], 400);
+        }
+ 
+        $stmt = $db->prepare("
+            UPDATE resources
+            SET title = ?, description = ?, link = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([$title, $description, $link, $input["id"]]);
+ 
+        sendResponse([
+            "success" => true,
+            "message" => "Resource updated successfully."
+        ]);
+    }
+ 
+    if ($method === "DELETE") {
+        if ($action === "delete_comment") {
+            if (!$commentId || !is_numeric($commentId)) {
+                sendResponse(["success" => false, "message" => "Invalid comment id."], 400);
+            }
+ 
+            $stmt = $db->prepare("DELETE FROM comments_resource WHERE id = ?");
+            $stmt->execute([$commentId]);
+ 
+            if ($stmt->rowCount() === 0) {
+                sendResponse(["success" => false, "message" => "Comment not found."], 404);
+            }
+ 
+            sendResponse([
+                "success" => true,
+                "message" => "Comment deleted successfully."
+            ]);
+        }
+ 
+        if (!$id || !is_numeric($id)) {
+            sendResponse(["success" => false, "message" => "Invalid resource id."], 400);
+        }
+ 
+        $stmt = $db->prepare("DELETE FROM resources WHERE id = ?");
+        $stmt->execute([$id]);
+ 
+        if ($stmt->rowCount() === 0) {
+            sendResponse(["success" => false, "message" => "Resource not found."], 404);
+        }
+ 
+        sendResponse([
+            "success" => true,
+            "message" => "Resource deleted successfully."
+        ]);
+    }
+ 
+    sendResponse(["success" => false, "message" => "Method not allowed."], 405);
+ 
+} catch (Throwable $e) {
+    sendResponse(["success" => false, "message" => "Server error."], 500);
 }
-
 ?>
