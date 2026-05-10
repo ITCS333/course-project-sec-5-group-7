@@ -5,43 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Details</title>
 </head>
-
 <body>
 
-<header>
-    <h1 id="resource-title"></h1>
-</header>
+<h1 id="resource-title"></h1>
 
-<main>
+<p id="resource-description"></p>
 
-    
-    <section id="resource-details-section">
+<a id="resource-link" href="#" target="_blank">Open Resource</a>
 
-        <article id="resource-details">
-            <p id="resource-description"></p>
+<section>
+    <h2>Comments</h2>
 
-            <a id="resource-link" href="#" target="_blank">
-                Access Resource Material
-            </a>
-        </article>
+    <div id="comment-list"></div>
 
-    </section>
-
-    <section id="discussion-forum">
-
-        <h2>Discussion</h2>
-
-        
-        <ul id="comment-list"></ul>
-
-        <form id="comment-form">
-            <textarea id="new-comment" required></textarea>
-            <button type="submit">Post Comment</button>
-        </form>
-
-    </section>
-
-</main>
+    <form id="comment-form">
+        <textarea id="new-comment" required></textarea>
+        <button type="submit">Post</button>
+    </form>
+</section>
 
 <script src="details.js" defer></script>
 
