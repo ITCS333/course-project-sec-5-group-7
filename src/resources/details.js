@@ -10,85 +10,55 @@ const input = document.querySelector("#new-comment");
 let comments = [];
 
 function renderDetails(resource) {
-  titleEl.textContent = resource.title;
-  descEl.textContent = resource.description || "";
-  linkEl.href = resource.link;
+    titleEl.textContent = resource.title;
+    descEl.textContent = resource.description;
+    linkEl.href = resource.link;
 }
 
-function createComment(comment) {
-  const li = document.createElement("li");
-
-  const text = document.createElement("p");
-  text.textContent = comment.text;
-
-  const author = document.createElement("small");
-  author.textContent = comment.author;
-
-  li.appendChild(text);
-  li.appendChild(author);
-
-  return li;
+function createComment(c) {
+    const div = document.createElement("div");
+    div.innerHTML = `<p>${c.text}</p><small>${c.author}</small>`;
+    return div;
 }
 
 function renderComments() {
-  commentList.innerHTML = "";
-
-  comments.forEach(c => {
-    commentList.appendChild(createComment(c));
-  });
+    commentList.innerHTML = "";
+    comments.forEach(c => commentList.appendChild(createComment(c)));
 }
 
-async function handleAddComment(e) {
-  e.preventDefault();
+async function loadData() {
+    const r1 = await fetch(`./api/index.php?id=${id}`);
+    const r2 = await fetch(`./api/index.php?resource_id=${id}&action=comments`);
 
-  const text = input.value.trim();
-  if (!text) return;
+    const d1 = await r1.json();
+    const d2 = await r2.json();
 
-  const res = await fetch("./api/index.php?action=comment", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      resource_id: id,
-      author: "Student",
-      text: text
-    })
-  });
+    renderDetails(d1.data);
 
-  const result = await res.json();
+    comments = d2.data || [];
+    renderComments();
+}
 
-  if (result.success) {
-    comments.push({
-      id: result.id,
-      resource_id: id,
-      author: "Student",
-      text: text
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const text = input.value;
+
+    const res = await fetch("./api/index.php?action=comment", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            resource_id: id,
+            author: "Student",
+            text
+        })
     });
 
+    const result = await res.json();
+
+    comments.push(result.data);
     renderComments();
     input.value = "";
-  }
-}
+});
 
-async function initializePage() {
-  if (!id) return;
-
-  const res1 = await fetch(`./api/index.php?id=${id}`);
-  const data1 = await res1.json();
-
-  const res2 = await fetch(`./api/index.php?resource_id=${id}&action=comments`);
-  const data2 = await res2.json();
-
-  if (!data1.success || !data1.data) {
-    titleEl.textContent = "Resource not found";
-    return;
-  }
-
-  renderDetails(data1.data);
-
-  comments = data2.success ? data2.data : [];
-  renderComments();
-
-  form.addEventListener("submit", handleAddComment);
-}
-
-initializePage();
+loadData();
