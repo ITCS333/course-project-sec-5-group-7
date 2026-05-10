@@ -3,53 +3,47 @@ let resources = [];
 const form = document.querySelector("#resource-form");
 const tbody = document.querySelector("#resources-tbody");
 
-function createResourceRow(resource) {
+function createRow(resource) {
   const tr = document.createElement("tr");
 
-  const titleTd = document.createElement("td");
-  titleTd.textContent = resource.title;
+  const t1 = document.createElement("td");
+  t1.textContent = resource.title;
 
-  const descTd = document.createElement("td");
-  descTd.textContent = resource.description;
+  const t2 = document.createElement("td");
+  t2.textContent = resource.description;
 
-  const linkTd = document.createElement("td");
+  const t3 = document.createElement("td");
   const a = document.createElement("a");
   a.href = resource.link;
   a.textContent = "Link";
-  a.target = "_blank";
-  linkTd.appendChild(a);
+  t3.appendChild(a);
 
-  const actionsTd = document.createElement("td");
+  const t4 = document.createElement("td");
 
-  const editBtn = document.createElement("button");
-  editBtn.className = "edit-btn";
-  editBtn.dataset.id = resource.id;
-  editBtn.textContent = "Edit";
+  const del = document.createElement("button");
+  del.className = "delete-btn";
+  del.dataset.id = resource.id;
+  del.textContent = "Delete";
 
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "delete-btn";
-  deleteBtn.dataset.id = resource.id;
-  deleteBtn.textContent = "Delete";
+  t4.appendChild(del);
 
-  actionsTd.appendChild(editBtn);
-  actionsTd.appendChild(deleteBtn);
-
-  tr.appendChild(titleTd);
-  tr.appendChild(descTd);
-  tr.appendChild(linkTd);
-  tr.appendChild(actionsTd);
+  tr.appendChild(t1);
+  tr.appendChild(t2);
+  tr.appendChild(t3);
+  tr.appendChild(t4);
 
   return tr;
 }
 
-function renderTable() {
+function render() {
   tbody.innerHTML = "";
+
   for (let i = 0; i < resources.length; i++) {
-    tbody.appendChild(createResourceRow(resources[i]));
+    tbody.appendChild(createRow(resources[i]));
   }
 }
 
-async function handleAddResource(e) {
+async function handleAdd(e) {
   e.preventDefault();
 
   const title = document.querySelector("#resource-title").value;
@@ -71,33 +65,31 @@ async function handleAddResource(e) {
     link
   });
 
-  renderTable();
+  render();
   form.reset();
 }
 
-function handleTableClick(e) {
+function handleClick(e) {
   if (e.target.classList.contains("delete-btn")) {
     const id = e.target.dataset.id;
 
-    fetch(`./api/index.php?id=${id}`, {
-      method: "DELETE"
-    });
+    fetch(`./api/index.php?id=${id}`, { method: "DELETE" });
 
     resources = resources.filter(r => r.id != id);
-    renderTable();
+    render();
   }
 }
 
-async function loadAndInitialize() {
+async function init() {
   const res = await fetch("./api/index.php");
   const result = await res.json();
 
   resources = result.data;
 
-  renderTable();
+  render();
 
-  form.addEventListener("submit", handleAddResource);
-  tbody.addEventListener("click", handleTableClick);
+  form.addEventListener("submit", handleAdd);
+  tbody.addEventListener("click", handleClick);
 }
 
-loadAndInitialize();
+init();
