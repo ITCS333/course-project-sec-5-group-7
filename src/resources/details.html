@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Details</title>
 </head>
+
 <body>
 
 <header>
@@ -13,23 +14,32 @@
 
 <main>
 
-<article>
-    <p id="resource-description"></p>
-    <a id="resource-link" href="#" target="_blank">Access Resource Material</a>
-</article>
+    
+    <section id="resource-details-section">
 
-<section id="discussion-forum">
+        <article id="resource-details">
+            <p id="resource-description"></p>
 
-    <h2>Discussion</h2>
+            <a id="resource-link" href="#" target="_blank">
+                Access Resource Material
+            </a>
+        </article>
 
-    <div id="comment-list"></div>
+    </section>
 
-    <form id="comment-form">
-        <textarea id="new-comment" required></textarea>
-        <button type="submit">Post Comment</button>
-    </form>
+    <section id="discussion-forum">
 
-</section>
+        <h2>Discussion</h2>
+
+        
+        <ul id="comment-list"></ul>
+
+        <form id="comment-form">
+            <textarea id="new-comment" required></textarea>
+            <button type="submit">Post Comment</button>
+        </form>
+
+    </section>
 
 </main>
 
