@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Resources</title>
+    <title>Admin</title>
 </head>
 <body>
 
-<h1>Manage Resources</h1>
-
 <form id="resource-form">
 
-    <input type="text" id="resource-title" placeholder="Title" required>
+    <input id="resource-title" type="text" placeholder="Title" required>
+    <input id="resource-description" type="text" placeholder="Description">
+    <input id="resource-link" type="url" placeholder="Link" required>
 
-    <input type="text" id="resource-description" placeholder="Description">
-
-    <input type="url" id="resource-link" placeholder="Link" required>
-
-    <button type="submit">Save</button>
+    <button type="submit">Add</button>
 
 </form>
 
@@ -34,7 +29,7 @@
     <tbody id="resources-table-body"></tbody>
 </table>
 
-<script src="admin.js" defer></script>
+<script src="admin.js"></script>
 
 </body>
 </html>
