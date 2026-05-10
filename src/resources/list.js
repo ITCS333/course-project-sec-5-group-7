@@ -1,54 +1,34 @@
-/*
-  Requirement: Populate the "Course Resources" list page.
-
-  Instructions:
-  1. Link this file to `list.html` using:
-     <script src="list.js" defer></script>
-
-  2. In `list.html`, add id="resource-list-section" to the
-     <section> element that will contain the resource articles.
-
-  3. Implement the TODOs below.
-*/
-
-// --- Element Selections ---
 const resourceListSection = document.querySelector("#resource-list-section");
-
-// --- Functions ---
 
 function createResourceArticle(resource) {
   const article = document.createElement("article");
 
-  const title = document.createElement("h2");
-  title.textContent = resource.title;
+  const h = document.createElement("h2");
+  h.textContent = resource.title;
 
-  const description = document.createElement("p");
-  description.textContent = resource.description;
+  const p = document.createElement("p");
+  p.textContent = resource.description;
 
-  const link = document.createElement("a");
-  link.textContent = "View Resource & Discussion";
-  link.href = `details.html?id=${resource.id}`;
+  const a = document.createElement("a");
+  a.href = `details.html?id=${resource.id}`;
+  a.textContent = "View Resource & Discussion";
 
-  article.appendChild(title);
-  article.appendChild(description);
-  article.appendChild(link);
+  article.appendChild(h);
+  article.appendChild(p);
+  article.appendChild(a);
 
   return article;
 }
 
 async function loadResources() {
-  const response = await fetch("./api/index.php");
-
-  const result = await response.json();
+  const res = await fetch("./api/index.php");
+  const result = await res.json();
 
   resourceListSection.innerHTML = "";
 
-  result.data.forEach((resource) => {
-    const article = createResourceArticle(resource);
-
-    resourceListSection.appendChild(article);
-  });
+  for (let i = 0; i < result.data.length; i++) {
+    resourceListSection.appendChild(createResourceArticle(result.data[i]));
+  }
 }
 
-// --- Initial Page Load ---
 loadResources();
