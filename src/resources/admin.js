@@ -1,7 +1,7 @@
 let resources = [];
 
 const form = document.querySelector("#resource-form");
-const tbody = document.querySelector("#resources-tbody");
+const tbody = document.querySelector("#resources-table-body");
 
 function createRow(r) {
     const tr = document.createElement("tr");
@@ -24,8 +24,13 @@ function render() {
 async function load() {
     const res = await fetch("./api/index.php");
     const result = await res.json();
-    resources = result.data;
-    render();
+
+    if (result.success) {
+        resources = result.data;
+        render();
+    } else {
+        console.error("Load failed:", result.message);
+    }
 }
 
 form.addEventListener("submit", async (e) => {
@@ -37,33 +42,43 @@ form.addEventListener("submit", async (e) => {
 
     const res = await fetch("./api/index.php", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, description, link })
     });
 
     const result = await res.json();
 
-    resources.push({
-        id: result.data.id,
-        title,
-        description,
-        link
-    });
+    if (result.success) {
+        resources.push({
+            id: result.id,
+            title,
+            description,
+            link
+        });
 
-    render();
-    form.reset();
+        render();
+        form.reset();
+    } else {
+        alert(result.message);
+    }
 });
 
 tbody.addEventListener("click", async (e) => {
     if (e.target.classList.contains("delete-btn")) {
         const id = e.target.dataset.id;
 
-        await fetch(`./api/index.php?id=${id}`, {
+        const res = await fetch(`./api/index.php?id=${id}`, {
             method: "DELETE"
         });
 
-        resources = resources.filter(r => r.id != id);
-        render();
+        const result = await res.json();
+
+        if (result.success) {
+            resources = resources.filter(r => r.id != id);
+            render();
+        } else {
+            alert(result.message);
+        }
     }
 });
 
