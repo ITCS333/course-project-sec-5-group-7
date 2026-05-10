@@ -12,7 +12,30 @@
 </header>
 
 <main>
-    <section id="resource-list-section"></section>
+
+    <!-- Search -->
+    <section>
+        <input type="text" id="search-input" placeholder="Search resources">
+    </section>
+
+    <!-- List Controls -->
+    <section>
+        <select id="sort-select">
+            <option value="created_at">Newest</option>
+            <option value="title">Title</option>
+        </select>
+
+        <select id="order-select">
+            <option value="desc">Desc</option>
+            <option value="asc">Asc</option>
+        </select>
+    </section>
+
+    <!-- Resource List -->
+    <section id="resource-list-section">
+        <ul id="resource-list"></ul>
+    </section>
+
 </main>
 
 <script src="list.js" defer></script>
