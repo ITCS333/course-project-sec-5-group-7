@@ -1,4 +1,4 @@
-let currentResourceId = new URLSearchParams(window.location.search).get("id");
+const id = new URLSearchParams(window.location.search).get("id");
 
 const titleEl = document.querySelector("#resource-title");
 const descEl = document.querySelector("#resource-description");
@@ -7,19 +7,15 @@ const commentList = document.querySelector("#comment-list");
 const form = document.querySelector("#comment-form");
 const input = document.querySelector("#new-comment");
 
-let currentComments = [];
+let comments = [];
 
-function getResourceIdFromURL() {
-  return currentResourceId;
-}
-
-function renderResourceDetails(resource) {
+function renderDetails(resource) {
   titleEl.textContent = resource.title;
   descEl.textContent = resource.description;
   linkEl.href = resource.link;
 }
 
-function createCommentArticle(comment) {
+function createComment(comment) {
   const article = document.createElement("article");
 
   const p = document.createElement("p");
@@ -37,23 +33,22 @@ function createCommentArticle(comment) {
 function renderComments() {
   commentList.innerHTML = "";
 
-  for (let i = 0; i < currentComments.length; i++) {
-    commentList.appendChild(createCommentArticle(currentComments[i]));
+  for (let i = 0; i < comments.length; i++) {
+    commentList.appendChild(createComment(comments[i]));
   }
 }
 
-async function handleAddComment(event) {
-  event.preventDefault();
+async function handleAddComment(e) {
+  e.preventDefault();
 
   const text = input.value;
-
   if (!text) return;
 
   const res = await fetch("./api/index.php?action=comment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      resource_id: currentResourceId,
+      resource_id: id,
       author: "Student",
       text: text
     })
@@ -61,29 +56,27 @@ async function handleAddComment(event) {
 
   const result = await res.json();
 
-  currentComments.push(result.data);
+  comments.push(result.data);
 
   renderComments();
   input.value = "";
 }
 
 async function initializePage() {
-  const id = getResourceIdFromURL();
-
-  if (!id) {
-    titleEl.textContent = "Resource not found.";
-    return;
-  }
-
   const res1 = await fetch(`./api/index.php?id=${id}`);
   const res2 = await fetch(`./api/index.php?resource_id=${id}&action=comments`);
 
   const data1 = await res1.json();
   const data2 = await res2.json();
 
-  currentComments = data2.data || [];
+  if (!data1.data) {
+    titleEl.textContent = "Resource not found";
+    return;
+  }
 
-  renderResourceDetails(data1.data);
+  renderDetails(data1.data);
+
+  comments = data2.data || [];
   renderComments();
 
   form.addEventListener("submit", handleAddComment);
