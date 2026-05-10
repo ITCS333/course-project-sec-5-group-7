@@ -3,63 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Resources</title>
-    <script src="admin.js" defer></script>
+    <title>Admin Resources</title>
 </head>
 <body>
+
 <header>
     <h1>Manage Resources</h1>
 </header>
 
 <main>
+
     <section id="resource-form-section"></section>
+
     <section id="resource-table-section"></section>
+
 </main>
 
 <script src="admin.js" defer></script>
-<h1>Manage Course Resources</h1>
-
-<main>
-
-<section>
-    <h2>Add a New Resource</h2>
-
-    <form id="resource-form">
-        <fieldset>
-            <legend>Resource Details</legend>
-
-            <label for="resource-title">Title</label>
-            <input id="resource-title" type="text" required>
-
-            <label for="resource-description">Description</label>
-            <textarea id="resource-description"></textarea>
-
-            <label for="resource-link">Link</label>
-            <input id="resource-link" type="url" required>
-
-            <button id="add-resource" type="submit">Add Resource</button>
-        </fieldset>
-    </form>
-</section>
-
-<section>
-    <h2>Existing Resources</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Link</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody id="resources-tbody"></tbody>
-    </table>
-</section>
-
-</main>
 
 </body>
 </html>
