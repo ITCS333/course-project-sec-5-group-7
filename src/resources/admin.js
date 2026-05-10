@@ -1,55 +1,94 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Resources</title>
-</head>
-<body>
+let resources = [];
 
-<header>
-    <h1>Manage Resources</h1>
-</header>
+const form = document.querySelector("#resource-form");
+const tbody = document.querySelector("#resources-tbody");
 
-<main>
+function createRow(resource) {
+  const tr = document.createElement("tr");
 
-    <!-- FORM (مهم جدًا للاختبارات) -->
-    <section id="resource-form-section">
-        <form id="resource-form">
+  const t1 = document.createElement("td");
+  t1.textContent = resource.title;
 
-            <label>Title</label>
-            <input type="text" id="resource-title" required>
+  const t2 = document.createElement("td");
+  t2.textContent = resource.description;
 
-            <label>Description</label>
-            <input type="text" id="resource-description">
+  const t3 = document.createElement("td");
+  const a = document.createElement("a");
+  a.href = resource.link;
+  a.textContent = "Link";
+  a.target = "_blank";
+  t3.appendChild(a);
 
-            <label>Link</label>
-            <input type="url" id="resource-link" required>
+  const t4 = document.createElement("td");
 
-            <button type="submit">Add Resource</button>
+  const del = document.createElement("button");
+  del.className = "delete-btn";
+  del.dataset.id = resource.id;
+  del.textContent = "Delete";
 
-        </form>
-    </section>
+  t4.appendChild(del);
 
-    <!-- TABLE (مهم جدًا) -->
-    <section id="resource-table-section">
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Link</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+  tr.appendChild(t1);
+  tr.appendChild(t2);
+  tr.appendChild(t3);
+  tr.appendChild(t4);
 
-            <tbody id="resources-tbody"></tbody>
-        </table>
-    </section>
+  return tr;
+}
 
-</main>
+function render() {
+  tbody.innerHTML = "";
+  resources.forEach(r => tbody.appendChild(createRow(r)));
+}
 
-<script src="admin.js" defer></script>
+async function handleAdd(e) {
+  e.preventDefault();
 
-</body>
-</html>
+  const title = document.querySelector("#resource-title").value;
+  const description = document.querySelector("#resource-description").value;
+  const link = document.querySelector("#resource-link").value;
+
+  const res = await fetch("./api/index.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, description, link })
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    resources.push({
+      id: result.id,
+      title,
+      description,
+      link
+    });
+
+    render();
+    form.reset();
+  }
+}
+
+function handleClick(e) {
+  if (e.target.classList.contains("delete-btn")) {
+    const id = e.target.dataset.id;
+
+    fetch(`./api/index.php?id=${id}`, { method: "DELETE" });
+
+    resources = resources.filter(r => r.id != id);
+    render();
+  }
+}
+
+async function init() {
+  const res = await fetch("./api/index.php");
+  const result = await res.json();
+
+  resources = result.data || [];
+  render();
+
+  form.addEventListener("submit", handleAdd);
+  tbody.addEventListener("click", handleClick);
+}
+
+init();
