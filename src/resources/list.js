@@ -3,19 +3,19 @@ const resourceListSection = document.querySelector("#resource-list-section");
 function createResourceArticle(resource) {
   const article = document.createElement("article");
 
-  const h = document.createElement("h2");
-  h.textContent = resource.title;
+  const title = document.createElement("h2");
+  title.textContent = resource.title;
 
-  const p = document.createElement("p");
-  p.textContent = resource.description;
+  const desc = document.createElement("p");
+  desc.textContent = resource.description;
 
-  const a = document.createElement("a");
-  a.href = `details.html?id=${resource.id}`;
-  a.textContent = "View Resource & Discussion";
+  const link = document.createElement("a");
+  link.href = `details.html?id=${resource.id}`;
+  link.textContent = "View Resource & Discussion";
 
-  article.appendChild(h);
-  article.appendChild(p);
-  article.appendChild(a);
+  article.appendChild(title);
+  article.appendChild(desc);
+  article.appendChild(link);
 
   return article;
 }
