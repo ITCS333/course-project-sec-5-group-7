@@ -6,32 +6,38 @@ const tbody = document.querySelector("#resources-tbody");
 function createResourceRow(resource) {
   const tr = document.createElement("tr");
 
-  const t1 = document.createElement("td");
-  t1.textContent = resource.title;
+  const titleTd = document.createElement("td");
+  titleTd.textContent = resource.title;
 
-  const t2 = document.createElement("td");
-  t2.textContent = resource.description;
+  const descTd = document.createElement("td");
+  descTd.textContent = resource.description;
 
-  const t3 = document.createElement("td");
+  const linkTd = document.createElement("td");
   const a = document.createElement("a");
   a.href = resource.link;
-  a.textContent = "Open";
+  a.textContent = "Link";
   a.target = "_blank";
-  t3.appendChild(a);
+  linkTd.appendChild(a);
 
-  const t4 = document.createElement("td");
+  const actionsTd = document.createElement("td");
 
-  const del = document.createElement("button");
-  del.className = "delete-btn";
-  del.dataset.id = resource.id;
-  del.textContent = "Delete";
+  const editBtn = document.createElement("button");
+  editBtn.className = "edit-btn";
+  editBtn.dataset.id = resource.id;
+  editBtn.textContent = "Edit";
 
-  t4.appendChild(del);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.className = "delete-btn";
+  deleteBtn.dataset.id = resource.id;
+  deleteBtn.textContent = "Delete";
 
-  tr.appendChild(t1);
-  tr.appendChild(t2);
-  tr.appendChild(t3);
-  tr.appendChild(t4);
+  actionsTd.appendChild(editBtn);
+  actionsTd.appendChild(deleteBtn);
+
+  tr.appendChild(titleTd);
+  tr.appendChild(descTd);
+  tr.appendChild(linkTd);
+  tr.appendChild(actionsTd);
 
   return tr;
 }
@@ -43,8 +49,8 @@ function renderTable() {
   }
 }
 
-async function handleAddResource(event) {
-  event.preventDefault();
+async function handleAddResource(e) {
+  e.preventDefault();
 
   const title = document.querySelector("#resource-title").value;
   const description = document.querySelector("#resource-description").value;
@@ -69,11 +75,13 @@ async function handleAddResource(event) {
   form.reset();
 }
 
-function handleTableClick(event) {
-  if (event.target.classList.contains("delete-btn")) {
-    const id = event.target.dataset.id;
+function handleTableClick(e) {
+  if (e.target.classList.contains("delete-btn")) {
+    const id = e.target.dataset.id;
 
-    fetch(`./api/index.php?id=${id}`, { method: "DELETE" });
+    fetch(`./api/index.php?id=${id}`, {
+      method: "DELETE"
+    });
 
     resources = resources.filter(r => r.id != id);
     renderTable();
