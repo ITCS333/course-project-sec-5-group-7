@@ -1,36 +1,52 @@
-const resourceListSection = document.querySelector("#resource-list-section");
+const resourceListSection = document.querySelector("#resource-list");
+
+const searchInput = document.querySelector("#search-input");
+const sortSelect = document.querySelector("#sort-select");
+const orderSelect = document.querySelector("#order-select");
 
 function createResourceArticle(resource) {
-    const article = document.createElement("article");
+    const li = document.createElement("li");
 
-    const title = document.createElement("h2");
+    const title = document.createElement("h3");
     title.textContent = resource.title;
 
     const description = document.createElement("p");
-    description.textContent = resource.description;
+    description.textContent = resource.description || "";
 
     const link = document.createElement("a");
-    link.textContent = "View Resource & Discussion";
+    link.textContent = "View Resource";
     link.href = `details.html?id=${resource.id}`;
 
-    article.appendChild(title);
-    article.appendChild(description);
-    article.appendChild(link);
+    li.appendChild(title);
+    li.appendChild(description);
+    li.appendChild(link);
 
-    return article;
+    return li;
 }
 
 async function loadResources() {
-    const response = await fetch("./api/index.php");
+    let url = "./api/index.php";
+
+    const search = searchInput?.value || "";
+    const sort = sortSelect?.value || "created_at";
+    const order = orderSelect?.value || "desc";
+
+    url += `?search=${search}&sort=${sort}&order=${order}`;
+
+    const response = await fetch(url);
     const result = await response.json();
 
     resourceListSection.innerHTML = "";
 
-    if (result.success) {
+    if (result.success && Array.isArray(result.data)) {
         result.data.forEach(resource => {
             resourceListSection.appendChild(createResourceArticle(resource));
         });
     }
 }
+
+searchInput?.addEventListener("input", loadResources);
+sortSelect?.addEventListener("change", loadResources);
+orderSelect?.addEventListener("change", loadResources);
 
 loadResources();
