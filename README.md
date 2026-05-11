@@ -23,7 +23,7 @@ The website covers five functional areas, each assigned to one team member.
 |------|-------------|------------|-----------------|
 | 1 | Home Page, Authentication & User Management | 202008988 | BayanAsmawi |
 | 2 | Course Resources |202200392 |Rasha Alqashai |
-| 3 | Weekly Breakdown | | |
+| 3 | Weekly Breakdown | 202309727 | |
 | 4 | Assignments | 202008988 | BayanAsmawi |
 | 5 | Discussion Board | 202200814  | AyshaAlBaloshi |
 
