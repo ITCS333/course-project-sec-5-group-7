@@ -7,26 +7,43 @@ const topicListContainer = document.getElementById('topic-list-container');
 
 // --- Functions ---
 
-// Create a single topic <article>
 function createTopicArticle(topic) {
   const article = document.createElement('article');
   article.classList.add('list-group-item', 'mb-3');
+  article.style.backgroundColor = '#ffffff';
+  article.style.border = '1px solid #dee2e6';
+  article.style.borderRadius = '0.5rem';
+  article.style.padding = '1rem';
+  article.style.transition = 'box-shadow 0.2s ease';
+  article.onmouseenter = () => article.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+  article.onmouseleave = () => article.style.boxShadow = 'none';
 
   const h3 = document.createElement('h3');
   const link = document.createElement('a');
   link.href = `topic.html?id=${topic.id}`;
   link.textContent = topic.subject;
+  link.style.color = '#0d6efd';
+  link.style.fontWeight = '600';
+  link.style.textDecoration = 'none';
+  link.onmouseenter = () => link.style.textDecoration = 'underline';
+  link.onmouseleave = () => link.style.textDecoration = 'none';
   h3.appendChild(link);
   article.appendChild(h3);
 
   const footer = document.createElement('footer');
   footer.textContent = `Posted by: ${topic.author} on ${topic.created_at}`;
+  footer.style.fontSize = '0.875rem';
+  footer.style.color = '#6c757d';
+  footer.style.marginBottom = '0.5rem';
   article.appendChild(footer);
 
   const btnDiv = document.createElement('div');
+  btnDiv.style.display = 'flex';
+  btnDiv.style.gap = '0.5rem';
+
   const editBtn = document.createElement('button');
   editBtn.textContent = 'Edit';
-  editBtn.className = 'edit-btn btn btn-sm btn-secondary me-2';
+  editBtn.className = 'edit-btn btn btn-sm btn-secondary';
   editBtn.dataset.id = topic.id;
 
   const deleteBtn = document.createElement('button');
@@ -41,15 +58,11 @@ function createTopicArticle(topic) {
   return article;
 }
 
-// Render all topics
 function renderTopics() {
   topicListContainer.innerHTML = '';
-  topics.forEach(topic => {
-    topicListContainer.appendChild(createTopicArticle(topic));
-  });
+  topics.forEach(topic => topicListContainer.appendChild(createTopicArticle(topic)));
 }
 
-// Create or update topic
 async function handleCreateTopic(event) {
   event.preventDefault();
 
@@ -64,14 +77,12 @@ async function handleCreateTopic(event) {
   const editId = submitBtn.dataset.editId;
 
   if (editId) {
-    // Update existing topic
     await handleUpdateTopic(parseInt(editId), { subject, message });
     subjectInput.value = '';
     messageInput.value = '';
     submitBtn.textContent = 'Create Topic';
     delete submitBtn.dataset.editId;
   } else {
-    // Create new topic
     try {
       const res = await fetch('./api/index.php', {
         method: 'POST',
@@ -80,7 +91,6 @@ async function handleCreateTopic(event) {
       });
       const result = await res.json();
       if (result.success) {
-        // Fetch the created topic to get DB timestamp
         const topicRes = await fetch(`./api/index.php?id=${result.id}`);
         const topicData = await topicRes.json();
         if (topicData.success) {
@@ -99,7 +109,6 @@ async function handleCreateTopic(event) {
   }
 }
 
-// Update existing topic
 async function handleUpdateTopic(id, fields) {
   try {
     const res = await fetch('./api/index.php', {
@@ -121,7 +130,6 @@ async function handleUpdateTopic(id, fields) {
   }
 }
 
-// Handle edit/delete button clicks
 async function handleTopicListClick(event) {
   const target = event.target;
 
@@ -155,7 +163,6 @@ async function handleTopicListClick(event) {
   }
 }
 
-// Load topics and initialize event listeners
 async function loadAndInitialize() {
   try {
     const res = await fetch('./api/index.php');
@@ -175,5 +182,4 @@ async function loadAndInitialize() {
   }
 }
 
-// --- Initial Load ---
 loadAndInitialize();
