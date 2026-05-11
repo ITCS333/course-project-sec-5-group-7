@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Meta Tag for Character Encoding -->
@@ -10,12 +10,166 @@
     <!-- Title of the Page -->
     <title>Manage Resources</title>
 
-    <!-- Link to External CSS Framework or Stylesheet -->
-    <link rel="stylesheet" href="styles.css">
+   
+    <style>
+        /* =========================
+           General Styles
+        ========================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
 
-    <!-- Link to External JavaScript File -->
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           Header
+        ========================= */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+        }
+
+        /* =========================
+           Main Layout
+        ========================= */
+        main {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+
+        /* =========================
+           Sections
+        ========================= */
+        section {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        section h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        /* =========================
+           Form Styles
+        ========================= */
+        form fieldset {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        form legend {
+            padding: 0 10px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        /* Button */
+        button {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* =========================
+           Table Styles
+        ========================= */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        thead {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* =========================
+           Action Buttons
+        ========================= */
+        .edit-btn {
+            background-color: #f39c12;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .edit-btn:hover {
+            background-color: #d68910;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+
+    <!-- JavaScript File -->
     <script src="admin.js" defer></script>
 </head>
+
 <body>
 
     <!-- Header Section -->
@@ -33,19 +187,15 @@
                 <fieldset>
                     <legend>Resource Details</legend>
 
-                    <!-- Resource Title -->
                     <label for="resource-title">Resource Title:</label>
                     <input id="resource-title" type="text" required>
 
-                    <!-- Resource Description -->
                     <label for="resource-description">Resource Description:</label>
                     <textarea id="resource-description"></textarea>
 
-                    <!-- Resource Link -->
                     <label for="resource-link">Resource Link:</label>
                     <input id="resource-link" type="url" required>
 
-                    <!-- Submit Button -->
                     <button id="add-resource" type="submit">Add Resource</button>
                 </fieldset>
             </form>
@@ -65,7 +215,6 @@
                     </tr>
                 </thead>
                 <tbody id="resources-tbody">
-                    <!-- Dynamically Injected Rows by admin.js -->
                     <tr>
                         <td>Sample Resource Title</td>
                         <td>Sample description for the resource.</td>
