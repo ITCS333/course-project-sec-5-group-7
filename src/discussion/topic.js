@@ -10,22 +10,72 @@ const replyListContainer  = document.getElementById('reply-list-container');
 const replyForm           = document.getElementById('reply-form');
 const newReplyText        = document.getElementById('new-reply');
 
+// --- Inject CSS dynamically ---
+const style = document.createElement('style');
+style.textContent = `
+#original-post {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  transition: box-shadow 0.2s ease;
+}
+#original-post:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+#op-message {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+#op-footer {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+#reply-list-container article {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  transition: box-shadow 0.2s ease;
+}
+#reply-list-container article:hover {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+#reply-list-container p {
+  margin: 0 0 0.5rem 0;
+}
+#reply-list-container footer {
+  font-size: 0.875rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+#reply-list-container button {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+#reply-form {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+`;
+document.head.appendChild(style);
+
 // --- Functions ---
 
-// Extract topic id from URL query string
 function getTopicIdFromURL() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
 }
 
-// Render the original topic post
 function renderOriginalPost(topic) {
   topicSubject.textContent = topic.subject;
   opMessage.textContent    = topic.message;
   opFooter.textContent     = `Posted by: ${topic.author} on ${topic.created_at}`;
 }
 
-// Create a single reply <article>
 function createReplyArticle(reply) {
   const article = document.createElement('article');
   article.classList.add('list-group-item', 'mb-3');
@@ -50,7 +100,6 @@ function createReplyArticle(reply) {
   return article;
 }
 
-// Render all replies
 function renderReplies() {
   replyListContainer.innerHTML = '';
   currentReplies.forEach(reply => {
@@ -58,17 +107,14 @@ function renderReplies() {
     replyListContainer.appendChild(article);
   });
 
-  // Scroll the last reply into view safely
   const lastReply = replyListContainer.lastChild;
   if (lastReply && typeof lastReply.scrollIntoView === 'function') {
     lastReply.scrollIntoView({ behavior: 'smooth' });
   }
 }
 
-// Handle adding a new reply
 async function handleAddReply(event) {
   event.preventDefault();
-
   const text = newReplyText.value.trim();
   if (!text) return;
 
@@ -79,12 +125,10 @@ async function handleAddReply(event) {
       body: JSON.stringify({ topic_id: currentTopicId, author: 'Student', text })
     });
     const result = await res.json();
-
     if (result.success) {
-      // API returns result.data as the new reply object
       currentReplies.push(result.data);
       renderReplies();
-      newReplyText.value = ''; // ✅ Clear textarea after successful POST
+      newReplyText.value = '';
     } else {
       alert(result.message || 'Failed to post reply.');
     }
@@ -94,7 +138,6 @@ async function handleAddReply(event) {
   }
 }
 
-// Handle clicks in the replies container (delegated)
 async function handleReplyListClick(event) {
   const target = event.target;
   if (target.classList.contains('delete-reply-btn')) {
@@ -102,11 +145,8 @@ async function handleReplyListClick(event) {
     if (!confirm('Are you sure you want to delete this reply?')) return;
 
     try {
-      const res = await fetch(`./api/index.php?action=delete_reply&id=${id}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`./api/index.php?action=delete_reply&id=${id}`, { method: 'DELETE' });
       const result = await res.json();
-
       if (result.success) {
         currentReplies = currentReplies.filter(r => r.id !== id);
         renderReplies();
@@ -120,7 +160,6 @@ async function handleReplyListClick(event) {
   }
 }
 
-// Initialize page: fetch topic and replies
 async function initializePage() {
   currentTopicId = getTopicIdFromURL();
   if (!currentTopicId) {
@@ -129,7 +168,6 @@ async function initializePage() {
   }
 
   try {
-    // Fetch topic and replies in parallel
     const [topicRes, repliesRes] = await Promise.all([
       fetch(`./api/index.php?id=${currentTopicId}`),
       fetch(`./api/index.php?action=replies&topic_id=${currentTopicId}`)
@@ -141,8 +179,6 @@ async function initializePage() {
       renderOriginalPost(topicData.data);
       currentReplies = repliesData.success ? repliesData.data : [];
       renderReplies();
-
-      // Attach event listeners
       replyForm.addEventListener('submit', handleAddReply);
       replyListContainer.addEventListener('click', handleReplyListClick);
     } else {
@@ -154,5 +190,4 @@ async function initializePage() {
   }
 }
 
-// --- Initial Page Load ---
 initializePage();
